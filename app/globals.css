@@ -1,0 +1,275 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated to purple retrowave Atlantis theme */
+  --background: #0a0a0f; /* Deep dark blue-black */
+  --foreground: #e0c3fc; /* Light purple text */
+  --card: #1a1a2e; /* Dark purple cards */
+  --card-foreground: #e0c3fc; /* Light purple text on cards */
+  --popover: #1a1a2e; /* Dark purple popovers */
+  --popover-foreground: #e0c3fc; /* Light purple text in popovers */
+  --primary: #9d4edd; /* Bright purple primary */
+  --primary-foreground: #ffffff; /* White text on primary */
+  --secondary: #7209b7; /* Deep purple secondary */
+  --secondary-foreground: #ffffff; /* White text on secondary */
+  --muted: #16213e; /* Dark blue muted */
+  --muted-foreground: #a663cc; /* Medium purple muted text */
+  --accent: #c77dff; /* Light purple accent */
+  --accent-foreground: #0a0a0f; /* Dark text on accent */
+  --destructive: #ff006e; /* Pink destructive */
+  --destructive-foreground: #ffffff; /* White text on destructive */
+  --border: #3c096c; /* Purple borders */
+  --input: #1a1a2e; /* Dark purple input fields */
+  --ring: #9d4edd; /* Purple focus rings */
+  --chart-1: #9d4edd; /* Purple for charts */
+  --chart-2: #c77dff; /* Light purple for charts */
+  --chart-3: #7209b7; /* Deep purple for charts */
+  --chart-4: #ff006e; /* Pink for charts */
+  --chart-5: #16213e; /* Dark blue for charts */
+  --radius: 0.5rem; /* Rounded corners */
+  --sidebar: #0a0a0f; /* Deep dark blue-black sidebar */
+  --sidebar-foreground: #e0c3fc; /* Light purple sidebar text */
+  --sidebar-primary: #9d4edd; /* Bright purple sidebar primary */
+  --sidebar-primary-foreground: #ffffff; /* White sidebar primary text */
+  --sidebar-accent: #c77dff; /* Light purple sidebar accent */
+  --sidebar-accent-foreground: #0a0a0f; /* Dark sidebar accent text */
+  --sidebar-border: #3c096c; /* Purple sidebar borders */
+  --sidebar-ring: #9d4edd; /* Purple sidebar focus */
+}
+
+.dark {
+  /* Dark mode maintains the same purple Atlantis theme */
+  --background: #0a0a0f;
+  --foreground: #e0c3fc;
+  --card: #1a1a2e;
+  --card-foreground: #e0c3fc;
+  --popover: #1a1a2e;
+  --popover-foreground: #e0c3fc;
+  --primary: #9d4edd;
+  --primary-foreground: #ffffff;
+  --secondary: #7209b7;
+  --secondary-foreground: #ffffff;
+  --muted: #16213e;
+  --muted-foreground: #a663cc;
+  --accent: #c77dff;
+  --accent-foreground: #0a0a0f;
+  --destructive: #ff006e;
+  --destructive-foreground: #ffffff;
+  --border: #3c096c;
+  --input: #1a1a2e;
+  --ring: #9d4edd;
+  --chart-1: #9d4edd;
+  --chart-2: #c77dff;
+  --chart-3: #7209b7;
+  --chart-4: #ff006e;
+  --chart-5: #16213e;
+  --sidebar: #0a0a0f;
+  --sidebar-foreground: #e0c3fc;
+  --sidebar-primary: #9d4edd;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #c77dff;
+  --sidebar-accent-foreground: #0a0a0f;
+  --sidebar-border: #3c096c;
+  --sidebar-ring: #9d4edd;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Added extensive purple retrowave Atlantis animations */
+@keyframes atlantis-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 20px #9d4edd, 0 0 40px #9d4edd, 0 0 60px #9d4edd;
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 30px #c77dff, 0 0 60px #c77dff, 0 0 90px #c77dff;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes gate-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes underwater-float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+@keyframes bubble-rise {
+  0% {
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes electric-current {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes hologram-flicker {
+  0%,
+  100% {
+    opacity: 1;
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    opacity: 0.8;
+    filter: hue-rotate(90deg);
+  }
+  50% {
+    opacity: 0.9;
+    filter: hue-rotate(180deg);
+  }
+  75% {
+    opacity: 0.7;
+    filter: hue-rotate(270deg);
+  }
+}
+
+@keyframes depth-wave {
+  0% {
+    transform: translateX(-100%) scaleY(1);
+  }
+  50% {
+    transform: translateX(0%) scaleY(1.2);
+  }
+  100% {
+    transform: translateX(100%) scaleY(1);
+  }
+}
+
+.atlantis-glow {
+  animation: atlantis-pulse 3s ease-in-out infinite;
+}
+
+.gate-shimmer {
+  background: linear-gradient(90deg, transparent, #9d4edd, transparent);
+  background-size: 200% 100%;
+  animation: gate-shimmer 2s linear infinite;
+}
+
+.underwater-float {
+  animation: underwater-float 6s ease-in-out infinite;
+}
+
+.bubble-animation {
+  animation: bubble-rise 8s linear infinite;
+}
+
+.electric-current {
+  background: linear-gradient(45deg, #9d4edd, #c77dff, #7209b7, #9d4edd);
+  background-size: 400% 400%;
+  animation: electric-current 2s ease infinite;
+}
+
+.hologram-effect {
+  animation: hologram-flicker 4s ease-in-out infinite;
+}
+
+.depth-wave {
+  animation: depth-wave 10s linear infinite;
+}
+
+.retro-glow {
+  animation: atlantis-pulse 2s ease-in-out infinite;
+}
+
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.atlantis-grid {
+  background-image: linear-gradient(rgba(157, 78, 221, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(157, 78, 221, 0.3) 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: depth-wave 15s linear infinite;
+}
+
+.lost-city-bg {
+  background: radial-gradient(ellipse at center, rgba(157, 78, 221, 0.1) 0%, transparent 70%),
+    linear-gradient(180deg, rgba(10, 10, 15, 0.9) 0%, rgba(26, 26, 46, 0.7) 100%);
+}
