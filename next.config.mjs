@@ -12,10 +12,6 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: [],
   },
-  async generateStaticParams() {
-    return []
-  },
-  runtime: 'nodejs',
 }
 
 export default nextConfig
