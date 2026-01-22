@@ -1,7 +1,18 @@
-
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 import { MemeBot } from "@/components/MemeBot";
 
-export default function TradingPage() {
+export default async function TradingPage() {
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        return redirect("/auth");
+    }
+
     return (
         <div className="container py-8">
             <div className="mb-8">
