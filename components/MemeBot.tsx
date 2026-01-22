@@ -3,7 +3,11 @@
 import React, { useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
 import axios from "axios";
-import { Activity, TrendingUp, Wallet, Play, Square, DollarSign } from "lucide-react";
+import { Activity, TrendingUp, Wallet, Play, Square, DollarSign, Lock, Shield, Zap } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 interface TokenPrice {
     symbol: string;
@@ -23,6 +27,7 @@ export function MemeBot() {
     const [tradeAmount, setTradeAmount] = useState<string>("0.01");
     const [targetToken, setTargetToken] = useState<string>("");
     const [logs, setLogs] = useState<string[]>([]);
+    const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
         // Determine backend URL
@@ -33,7 +38,13 @@ export function MemeBot() {
         setSocket(newSocket);
 
         newSocket.on("connect", () => {
+            setIsConnected(true);
             addLog(`Connected to Bot Engine at ${BACKEND_URL}`);
+        });
+
+        newSocket.on("disconnect", () => {
+            setIsConnected(false);
+            addLog("Disconnected from Bot Engine");
         });
 
         newSocket.on("priceUpdate", (data: TokenPrice[]) => {
@@ -61,7 +72,7 @@ export function MemeBot() {
             });
             addLog(`Wallet loaded: ${res.data.publicKey.slice(0, 6)}...`);
         } catch (e) {
-            addLog(`Error fetching status from ${BACKEND_URL}`);
+            addLog("Status fetch failed - Engine offline?");
         }
     };
 
@@ -89,105 +100,125 @@ export function MemeBot() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-700">
             {/* Wallet Status */}
-            <div className="flex items-center justify-between p-6 bg-card border rounded-xl shadow-sm">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 bg-purple-500/10 rounded-full">
-                        <Wallet className="w-6 h-6 text-purple-500" />
+            <Card className="lg:col-span-3 bg-card/80 backdrop-blur-sm border-primary/30 underwater-float">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium font-mono hologram-effect flex items-center gap-2">
+                        <Wallet className="w-4 h-4 text-primary atlantis-glow" />
+                        BOT WALLET BUFFER
+                    </CardTitle>
+                    <Badge variant="outline" className={`font-mono ${isConnected ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500'}`}>
+                        {isConnected ? 'ONLINE' : 'OFFLINE'}
+                    </Badge>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="text-2xl font-bold font-mono text-primary atlantis-glow">
+                            {wallet.balance.toFixed(4)} SOL
+                        </div>
+                        <div className="font-mono text-xs text-muted-foreground bg-black/40 px-3 py-1 rounded-full border border-primary/20">
+                            {wallet.publicKey}
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="text-sm font-medium text-muted-foreground">Bot Wallet</h3>
-                        <div className="font-mono text-xs text-muted-foreground">{wallet.publicKey}</div>
-                    </div>
-                </div>
-                <div className="text-right">
-                    <div className="text-2xl font-bold font-mono">{wallet.balance.toFixed(4)} SOL</div>
-                    <div className="text-xs text-green-500">Active</div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Market Monitor */}
-                <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
-                    <div className="p-4 border-b flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5 text-green-500" />
-                        <h3 className="font-semibold">Live Market</h3>
-                    </div>
-                    <div className="divide-y max-h-[400px] overflow-auto">
+            {/* Market Monitor */}
+            <Card className="lg:col-span-2 bg-card/80 backdrop-blur-sm border-secondary/30 underwater-float" style={{ animationDelay: "0.2s" }}>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium font-mono hologram-effect flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-secondary atlantis-glow" />
+                        MEMBRANE SCANNER
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="divide-y divide-secondary/20 max-h-[350px] overflow-auto pr-2 custom-scrollbar">
                         {prices.length === 0 ? (
-                            <div className="p-8 text-center text-muted-foreground italic">
-                                Scanning Solana Membrane...
+                            <div className="p-12 text-center text-muted-foreground italic font-mono flex flex-col items-center gap-4">
+                                <Activity className="w-8 h-8 animate-pulse text-secondary" />
+                                <span>Scanning the deep...</span>
                             </div>
                         ) : prices.map((token) => (
-                            <div key={token.symbol} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                                <span className="font-bold">{token.symbol}</span>
+                            <div key={token.symbol} className="py-3 flex items-center justify-between hover:bg-secondary/10 transition-colors px-2 rounded">
+                                <div className="flex items-center gap-3">
+                                    <Shield className="w-3 h-3 text-secondary/70" />
+                                    <span className="font-bold font-mono">{token.symbol}</span>
+                                </div>
                                 <div className="text-right">
                                     <div className="font-mono font-medium">${token.priceUsd.toFixed(6)}</div>
-                                    <div className={`text-xs ${token.change24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    <div className={`text-xs font-mono px-2 py-0.5 rounded ${token.change24h >= 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
                                         {token.change24h > 0 ? '+' : ''}{token.change24h.toFixed(2)}%
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
-                </div>
+                </CardContent>
+            </Card>
 
-                {/* Trade Controls */}
-                <div className="bg-card border rounded-xl shadow-sm p-6 space-y-4">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Activity className="w-5 h-5 text-blue-500" />
-                        <h3 className="font-semibold">Trade Terminal</h3>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-xs font-medium uppercase text-muted-foreground">Target Token (Address)</label>
-                        <input
-                            type="text"
-                            className="w-full p-2 bg-background border rounded font-mono text-sm focus:ring-2 ring-primary outline-none"
-                            placeholder="Ep9... or similar"
-                            value={targetToken}
-                            onChange={(e) => setTargetToken(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-xs font-medium uppercase text-muted-foreground">Amount (SOL)</label>
-                        <div className="relative">
-                            <DollarSign className="absolute left-2 top-2.5 w-4 h-4 text-muted-foreground" />
-                            <input
-                                type="number"
-                                className="w-full p-2 pl-8 bg-background border rounded font-mono text-sm focus:ring-2 ring-primary outline-none"
-                                value={tradeAmount}
-                                onChange={(e) => setTradeAmount(e.target.value)}
+            {/* Trade Controls */}
+            <div className="space-y-6 lg:col-span-1">
+                <Card className="bg-card/80 backdrop-blur-sm border-accent/30 underwater-float" style={{ animationDelay: "0.4s" }}>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium font-mono hologram-effect flex items-center gap-2">
+                            <Zap className="w-4 h-4 text-accent atlantis-glow" />
+                            EXECUTION TERMINAL
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-xs font-mono text-muted-foreground uppercase">Target Asset</label>
+                            <Input
+                                type="text"
+                                className="bg-black/40 border-accent/20 font-mono text-sm focus:border-accent"
+                                placeholder="Token Address..."
+                                value={targetToken}
+                                onChange={(e) => setTargetToken(e.target.value)}
                             />
                         </div>
-                    </div>
 
-                    <div className="flex gap-4 pt-2">
-                        <button
-                            onClick={handleTrade}
-                            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded flex items-center justify-center gap-2 transition-transform active:scale-95"
-                        >
-                            <Play className="w-4 h-4" /> BUY
-                        </button>
-                        <button
-                            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded flex items-center justify-center gap-2 transition-transform active:scale-95"
-                        >
-                            <Square className="w-4 h-4" /> SELL
-                        </button>
+                        <div className="space-y-2">
+                            <label className="text-xs font-mono text-muted-foreground uppercase">Volume (SOL)</label>
+                            <div className="relative">
+                                <DollarSign className="absolute left-2 top-2.5 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                    type="number"
+                                    className="pl-8 bg-black/40 border-accent/20 font-mono text-sm focus:border-accent"
+                                    value={tradeAmount}
+                                    onChange={(e) => setTradeAmount(e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 pt-2">
+                            <Button
+                                onClick={handleTrade}
+                                className="bg-green-600/20 hover:bg-green-600/40 text-green-500 border border-green-500/50 font-mono"
+                            >
+                                <Play className="w-3 h-3 mr-2" /> BUY
+                            </Button>
+                            <Button
+                                className="bg-red-600/20 hover:bg-red-600/40 text-red-500 border border-red-500/50 font-mono"
+                            >
+                                <Square className="w-3 h-3 mr-2" /> SELL
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Logs */}
+                <div className="bg-black/80 p-3 rounded-lg border border-primary/20 font-mono text-[10px] h-[150px] overflow-y-auto custom-scrollbar shadow-inner shadow-black/50">
+                    <div className="text-primary/70 mb-2 border-b border-primary/20 pb-1 flex justify-between">
+                        <span>SYSTEM LOGS</span>
+                        <span className="animate-pulse">●</span>
                     </div>
+                    {logs.map((log, i) => (
+                        <div key={i} className="mb-1 text-primary/60 truncate">
+                            {log}
+                        </div>
+                    ))}
                 </div>
-            </div>
-
-            {/* Logs */}
-            <div className="bg-black/90 p-4 rounded-xl border font-mono text-xs h-48 overflow-y-auto">
-                <div className="text-muted-foreground mb-2 border-b border-white/10 pb-1">SYSTEM LOGS</div>
-                {logs.map((log, i) => (
-                    <div key={i} className="mb-1 text-green-400/80">
-                        {log}
-                    </div>
-                ))}
             </div>
         </div>
     );

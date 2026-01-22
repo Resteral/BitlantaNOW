@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Lock, Unlock, Zap, TrendingUp, Shield, Star } from "lucide-react"
+import { Lock, Unlock, Zap, TrendingUp, Shield, Star, Terminal } from "lucide-react"
 import { GateModal } from "@/components/gate-modal"
 import { CryptoStats } from "@/components/crypto-stats"
 import { RetroBackground } from "@/components/retro-background"
@@ -22,6 +22,9 @@ import { LiveMarketFeed } from "@/components/live-market-feed"
 import { LivePriceTicker } from "@/components/live-price-ticker"
 import { marketDataService, type MarketAsset } from "@/lib/market-data"
 import { WalletConnector } from "@/components/wallet-connector"
+import { MemeBot } from "@/components/MemeBot"
+import Link from "next/link"
+import { createClient } from "@/lib/supabase/client"
 
 interface MarketSignal {
   id: string
@@ -48,6 +51,8 @@ export default function HomePage() {
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null)
   const [showAssetModal, setShowAssetModal] = useState(false)
   const [marketAssets, setMarketAssets] = useState<MarketAsset[]>([])
+  // Auth state
+  const [user, setUser] = useState<any>(null)
 
   const [marketSignals, setMarketSignals] = useState<MarketSignal[]>([
     {
@@ -76,6 +81,13 @@ export default function HomePage() {
     if (typeof window === "undefined") {
       return
     }
+
+    const checkAuth = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    checkAuth()
 
     const loadMarketData = async () => {
       console.log("[v0] Loading market data and initializing CoinGecko API")
@@ -232,6 +244,19 @@ export default function HomePage() {
               </h1>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
+              {!user ? (
+                <Link href="/auth/login">
+                  <Button variant="outline" className="font-mono border-primary/50 text-primary hover:bg-primary/20 atlantis-glow">
+                    CITIZEN LOGIN
+                  </Button>
+                </Link>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="font-mono border-green-500/50 text-green-500">
+                    CONNECTED
+                  </Badge>
+                </div>
+              )}
               {hasSubscription && (
                 <Badge variant="default" className="font-mono atlantis-glow text-xs sm:text-sm px-2 py-1">
                   ATLANTEAN
@@ -286,6 +311,39 @@ export default function HomePage() {
             <AtlantisGate isOpen={userLevel >= 5} level={3} />
           </div>
         </div>
+
+        {/* --- ATLANTEAN TRADING TERMINAL SECTION --- */}
+        <div className="mb-8 sm:mb-12">
+          <div className="text-center mb-6">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-2 font-mono hologram-effect flex items-center justify-center gap-3">
+              <Terminal className="w-6 h-6 sm:w-8 sm:h-8 text-secondary atlantis-glow" />
+              ATLANTEAN TRADING TERMINAL
+            </h3>
+            <p className="text-muted-foreground text-sm max-w-md mx-auto">
+              Direct connection to the high-frequency membrane scanner.
+            </p>
+          </div>
+
+          {user ? (
+            <div className="border border-primary/20 rounded-xl p-4 bg-black/20 backdrop-blur-sm">
+              <MemeBot />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center p-12 border border-dashed border-primary/30 rounded-xl bg-card/20 backdrop-blur-sm text-center space-y-4">
+              <Lock className="w-12 h-12 text-muted-foreground/50 mb-2" />
+              <h4 className="text-xl font-mono text-muted-foreground">TERMINAL LOCKED</h4>
+              <p className="text-sm text-muted-foreground/80 max-w-xs">
+                Authentication required to access live trading instruments.
+              </p>
+              <Link href="/auth/login">
+                <Button className="font-mono atlantis-glow bg-primary hover:bg-primary/80">
+                  SIGN IN TO ACCESS
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+        {/* ------------------------------------------- */}
 
         <div className="mb-8 sm:mb-12">
           <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 font-mono hologram-effect text-center">
