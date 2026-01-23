@@ -20,19 +20,23 @@ alter table public.signals enable row level security;
 
 -- Policies for signals
 -- Everyone can view signals (we will filter in the app for now)
+drop policy if exists "Public signals are viewable by everyone" on public.signals;
 create policy "Public signals are viewable by everyone"
   on public.signals for select
   using ( true );
 
 -- Only authenticated users (admins) can insert/update/delete
+drop policy if exists "Admins can insert signals" on public.signals;
 create policy "Admins can insert signals"
   on public.signals for insert
   with check ( auth.role() = 'authenticated' );
 
+drop policy if exists "Admins can update signals" on public.signals;
 create policy "Admins can update signals"
   on public.signals for update
   using ( auth.role() = 'authenticated' );
 
+drop policy if exists "Admins can delete signals" on public.signals;
 create policy "Admins can delete signals"
   on public.signals for delete
   using ( auth.role() = 'authenticated' );
@@ -48,10 +52,12 @@ create table if not exists public.user_tiers (
 alter table public.user_tiers enable row level security;
 
 -- Policies for user_tiers
+drop policy if exists "Users can view their own tier" on public.user_tiers;
 create policy "Users can view their own tier"
   on public.user_tiers for select
   using ( auth.uid() = id );
 
+drop policy if exists "Admins can view all user tiers" on public.user_tiers;
 create policy "Admins can view all user tiers"
   on public.user_tiers for select
   using ( auth.role() = 'authenticated' );
@@ -72,6 +78,7 @@ create table if not exists public.trades (
 alter table public.trades enable row level security;
 
 -- Policies for trades
+drop policy if exists "Admins can view all trades" on public.trades;
 create policy "Admins can view all trades"
   on public.trades for select
   using ( auth.role() = 'authenticated' );
@@ -89,14 +96,17 @@ alter table public.bot_settings enable row level security;
 
 -- Policies for bot_settings
 -- Only authenticated users (admins) can view/edit
+drop policy if exists "Admins can view bot settings" on public.bot_settings;
 create policy "Admins can view bot settings"
   on public.bot_settings for select
   using ( auth.role() = 'authenticated' );
 
+drop policy if exists "Admins can update bot settings" on public.bot_settings;
 create policy "Admins can update bot settings"
   on public.bot_settings for update
   using ( auth.role() = 'authenticated' );
 
+drop policy if exists "Admins can insert bot settings" on public.bot_settings;
 create policy "Admins can insert bot settings"
   on public.bot_settings for insert
   with check ( auth.role() = 'authenticated' );
