@@ -1,22 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap');
+
 :root {
-  --background: #050505;
-  --foreground: #33ff00;
-  --accent: #bc13fe;
-  --gold: #ffd700;
-  --grid: rgba(51, 255, 0, 0.1);
+  /* Deep Ocean / Void Backgrounds */
+  --bg-deep: #050214;
+  --bg-surface: #1a0b2e;
+
+  /* Text */
+  --foreground: #e0ffcd;
+  /* Pale Green/White */
+  --text-dim: rgba(224, 255, 205, 0.7);
+
+  /* Accents */
+  --neon-green: #39ff14;
+  --pale-green: #c8ffb0;
+  --neon-purple: #bc13fe;
+
+  /* Effects */
+  --glow-purple: rgba(138, 43, 226, 0.6);
+  --glow-green: rgba(57, 255, 20, 0.4);
+
+  --font-main: 'Outfit', sans-serif;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
-  font-family: var(--font-retro), monospace;
+  background-color: var(--bg-deep);
+  font-family: var(--font-main);
   overflow-x: hidden;
-  background-image: 
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 20px 20px;
+  min-height: 100vh;
+
+  /* "Bioluminescent Ocean" Gradient */
+  background:
+    radial-gradient(circle at 50% 0%, #2a1b4e 0%, transparent 60%),
+    radial-gradient(circle at 85% 30%, rgba(188, 19, 254, 0.1) 0%, transparent 40%),
+    linear-gradient(180deg, var(--bg-deep) 0%, #0a041f 100%);
+
+  background-attachment: fixed;
 }
 
+/* Global Reset & Base */
 * {
   box-sizing: border-box;
   padding: 0;
@@ -24,22 +46,30 @@ body {
 }
 
 a {
-  color: var(--accent);
+  color: var(--pale-green);
   text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-  text-shadow: 0 0 5px var(--accent);
+  transition: all 0.2s ease;
 }
 
-/* Scrollbar */
+a:hover {
+  color: var(--neon-green);
+  text-shadow: 0 0 10px var(--glow-green);
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #000;
+  background: var(--bg-deep);
 }
+
 ::-webkit-scrollbar-thumb {
-  background: var(--foreground);
-  border: 1px solid #000;
+  background: var(--bg-surface);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-purple);
 }

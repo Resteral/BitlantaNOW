@@ -47,17 +47,35 @@ export default function SignalFeed() {
         };
     }, []);
 
-    if (loading) return <div style={{ color: 'var(--foreground)', textAlign: 'center' }}>Scanning frequencies...</div>;
+    if (loading) return (
+        <div style={{
+            color: 'var(--neon-green)',
+            textAlign: 'center',
+            padding: '2rem',
+            letterSpacing: '0.2em',
+            animation: 'pulse 1.5s infinite'
+        }}>
+            SCANNING FREQUENCIES...
+            <style jsx>{`
+                @keyframes pulse {
+                    0%, 100% { opacity: 0.5; }
+                    50% { opacity: 1; text-shadow: 0 0 10px var(--neon-green); }
+                }
+            `}</style>
+        </div>
+    );
 
     if (signals.length === 0) return (
         <div style={{
-            color: 'var(--foreground)',
+            color: 'var(--text-dim)',
             textAlign: 'center',
-            border: '1px dashed var(--foreground)',
-            padding: '2rem',
-            opacity: 0.7
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            background: 'rgba(255, 255, 255, 0.02)',
+            padding: '3rem',
+            borderRadius: '16px',
+            backdropFilter: 'blur(5px)'
         }}>
-            NO ACTIVE TRANSMISSIONS FOUND
+            NO ACTIVE GATES DETECTED
         </div>
     );
 

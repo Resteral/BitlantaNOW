@@ -61,13 +61,17 @@ export default function CryptoBanner() {
       <style jsx>{`
         .crypto-banner {
           width: 100%;
-          background: #000;
-          border-bottom: 1px solid var(--foreground);
+          background: rgba(5, 2, 20, 0.8);
+          backdrop-filter: blur(10px);
+          border-bottom: 1px solid rgba(188, 19, 254, 0.2);
           overflow: hidden;
-          padding: 10px 0;
-          font-family: var(--font-retro);
-          font-size: 0.8rem;
+          padding: 12px 0;
+          font-family: var(--font-main);
+          font-size: 0.85rem;
           color: var(--foreground);
+          letter-spacing: 0.05em;
+          z-index: 100;
+          position: relative;
         }
         .ticker-wrap {
           width: 100%;
@@ -76,14 +80,16 @@ export default function CryptoBanner() {
         .ticker {
           display: inline-block;
           white-space: nowrap;
-          animation: ticker 20s linear infinite;
+          animation: ticker 30s linear infinite;
         }
         .ticker-item {
           display: inline-block;
-          padding: 0 2rem;
+          padding: 0 3rem;
         }
         .price {
-          color: var(--gold);
+          color: var(--neon-green);
+          font-weight: 700;
+          text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
         }
         @keyframes ticker {
           0% { transform: translateX(0); }
