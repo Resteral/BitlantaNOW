@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import CryptoBanner from '@/components/CryptoBanner';
+import SignalFeed from '@/components/SignalFeed';
 
 export default function Home() {
   return (
@@ -19,7 +20,9 @@ export default function Home() {
         alignItems: 'center',
         justifyContent: 'center',
         textAlign: 'center',
-        padding: '0 1rem'
+        padding: '0 1rem',
+        maxWidth: '1200px',
+        width: '100%'
       }}>
         <h1 style={{
           fontSize: '3rem',
@@ -33,18 +36,18 @@ export default function Home() {
           <span style={{ fontSize: '1.5rem', color: 'var(--accent)' }}>THE LOST CITY</span>
         </h1>
 
-        <p style={{
-          maxWidth: '600px',
-          lineHeight: '1.6',
-          marginBottom: '3rem',
-          borderLeft: '2px solid var(--accent)',
-          paddingLeft: '1rem',
-          textAlign: 'left'
-        }}>
-          Beneath the digital ruins, the signal remains.
-          Only the initiated may enter the sanctuary of truth and profit.
-          Markets never sleep, neither do we.
-        </p>
+        <div style={{ width: '100%', marginBottom: '3rem' }}>
+          <h2 style={{
+            fontSize: '1.5rem',
+            textAlign: 'left',
+            color: 'var(--gold)',
+            marginBottom: '1rem',
+            borderBottom: '1px solid var(--foreground)'
+          }}>
+            SYSTEM TRANSMISSIONS
+          </h2>
+          <SignalFeed />
+        </div>
 
         <Link href="/login" style={{
           padding: '1rem 2rem',

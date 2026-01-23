@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import CreateSignalForm from '@/components/CreateSignalForm';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -108,22 +109,10 @@ export default function DashboardPage() {
                     }}>
                         Signal Transmission
                     </h2>
-                    <p style={{ opacity: 0.7, fontSize: '0.9rem' }}>
+                    <p style={{ opacity: 0.7, fontSize: '0.9rem', marginBottom: '1.5rem' }}>
                         Broadcast new trading signals to the network.
                     </p>
-                    <button style={{
-                        width: '100%',
-                        padding: '1rem',
-                        marginTop: '1rem',
-                        background: 'var(--foreground)',
-                        color: 'var(--background)',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontWeight: 'bold',
-                        textTransform: 'uppercase'
-                    }}>
-                        Initialize Signal
-                    </button>
+                    <CreateSignalForm />
                 </div>
 
                 {/* Panel 2: Bot Status */}
@@ -177,6 +166,6 @@ export default function DashboardPage() {
                     </p>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
