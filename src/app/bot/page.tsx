@@ -7,9 +7,6 @@ import { PublicKey, LAMPORTS_PER_SOL, Transaction, SystemProgram } from '@solana
 import { SolanaProvider } from '@/components/SolanaProvider';
 import { getTokenMetadata, getSolPrice, getMultiTokenPrices, MobulaTokenData } from '@/lib/mobula';
 
-import dynamic from 'next/dynamic';
-
-
 // Removed problematic dynamic import
 
 interface Trade {
