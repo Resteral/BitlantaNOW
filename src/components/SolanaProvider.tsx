@@ -10,7 +10,7 @@ import {
 import { clusterApiUrl } from '@solana/web3.js';
 
 // Default styles that can be overridden by your app
-require('@solana/wallet-adapter-react-ui/styles.css');
+import '@solana/wallet-adapter-react-ui/styles.css';
 
 export const SolanaProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
     // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
@@ -31,6 +31,13 @@ export const SolanaProvider: FC<{ children: React.ReactNode }> = ({ children }) 
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [network]
     );
+
+    const [mounted, setMounted] = React.useState(false);
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
 
     return (
         <ConnectionProvider endpoint={endpoint}>

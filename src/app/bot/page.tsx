@@ -6,7 +6,13 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { PublicKey, LAMPORTS_PER_SOL, Transaction, SystemProgram } from '@solana/web3.js';
 import { SolanaProvider } from '@/components/SolanaProvider';
 
-function BotInterface() {
+import dynamic from 'next/dynamic';
+
+const BotInterface = dynamic(() => Promise.resolve(BotInterfaceInternal), {
+    ssr: false,
+});
+
+function BotInterfaceInternal() {
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
     const [balance, setBalance] = useState<number | null>(null);
