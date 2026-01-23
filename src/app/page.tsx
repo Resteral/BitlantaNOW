@@ -14,8 +14,33 @@ export default function Home() {
       position: 'relative',
       overflow: 'hidden' // For background overflow
     }}>
-      <CryptoBanner />
       <MarketTicker />
+
+      {/* ATMOSPHERIC BACKGROUND */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 0,
+        pointerEvents: 'none',
+        background: 'radial-gradient(circle at 50% 30%, rgba(57, 255, 20, 0.05) 0%, transparent 70%), radial-gradient(circle at 80% 80%, rgba(188, 19, 254, 0.05) 0%, transparent 50%)'
+      }} />
+
+      {/* SCANLINES OVERLAY */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 10,
+        pointerEvents: 'none',
+        background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
+        backgroundSize: '100% 2px, 3px 100%',
+        opacity: 0.3
+      }} />
 
       <main style={{
         flex: 1,
@@ -29,53 +54,55 @@ export default function Home() {
       }}>
 
         {/* HERO SECTION */}
-        <div style={{ textAlign: 'center', marginBottom: '6rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '6rem', position: 'relative' }}>
           <div style={{ position: 'relative', display: 'inline-block' }}>
             {/* Retro City Silhouette */}
             <div style={{
               position: 'absolute',
-              bottom: '90%', // Moved down slightly to overlap/sit on top
-              left: '26%', // Aligned specifically over "BIT"
+              bottom: '95%',
+              left: '26%',
               transform: 'translateX(-50%)',
               display: 'flex',
               alignItems: 'flex-end',
-              gap: '2px', // Tighter gap
+              gap: '2px',
               zIndex: 0,
-              opacity: 0.8,
+              opacity: 0.9,
               pointerEvents: 'none',
-              filter: 'drop-shadow(0 0 8px var(--neon-purple))'
+              filter: 'drop-shadow(0 0 15px var(--neon-purple))'
             }}>
-              {/* Cityscape Nodes over BIT */}
-              <div style={{ width: '10px', height: '25px', background: 'var(--neon-green)' }}></div>
-              <div style={{ width: '18px', height: '45px', background: 'var(--neon-purple)' }}></div>
-              <div style={{ width: '12px', height: '35px', background: 'var(--neon-green)' }}></div>
-              <div style={{ width: '8px', height: '20px', background: 'var(--neon-purple)' }}></div>
-              {/* Temple Dome */}
+              {/* Cityscape Nodes */}
+              <div style={{ width: '8px', height: '30px', background: 'var(--neon-green)', animation: 'flicker 3s infinite' }}></div>
+              <div style={{ width: '15px', height: '55px', background: 'var(--neon-purple)', animation: 'flicker 4s infinite' }}></div>
+              <div style={{ width: '10px', height: '40px', background: 'var(--neon-green)', animation: 'flicker 5s infinite' }}></div>
+              <div style={{ width: '6px', height: '25px', background: 'var(--neon-purple)', animation: 'flicker 2.5s infinite' }}></div>
               <div style={{
-                width: '24px',
-                height: '30px',
+                width: '20px',
+                height: '25px',
                 background: 'var(--neon-green)',
                 borderRadius: '50% 50% 0 0',
+                animation: 'flicker 6s infinite'
               }}></div>
             </div>
 
             <h1 style={{
-              fontSize: '5rem',
+              fontSize: 'min(5rem, 12vw)',
               fontWeight: 900,
               letterSpacing: '-0.05em',
               display: 'inline-flex',
               alignItems: 'center',
               marginBottom: '1rem',
-              filter: 'drop-shadow(0 0 20px rgba(57, 255, 20, 0.3))'
+              filter: 'drop-shadow(0 0 30px rgba(57, 255, 20, 0.4))'
             }}>
               {/* "BIT" Box */}
-              <span style={{
+              <span className="bit-box" style={{
                 background: 'var(--neon-green)',
                 color: '#050214',
                 padding: '0 0.5rem',
                 marginRight: '0.2rem',
                 borderRadius: '8px',
-                border: '2px solid rgba(255,255,255,0.2)'
+                border: '2px solid rgba(255,255,255,0.4)',
+                boxShadow: '0 0 20px var(--neon-green)',
+                animation: 'pulse-glow 2s infinite ease-in-out'
               }}>BIT</span>
               <span style={{ color: '#fff' }}>LANTA</span>
             </h1>
@@ -86,28 +113,37 @@ export default function Home() {
             color: 'var(--neon-purple)',
             fontWeight: 500,
             textTransform: 'uppercase',
-            letterSpacing: '0.2em',
+            letterSpacing: '0.3em',
             marginBottom: '2rem',
-            textShadow: '0 0 10px rgba(188, 19, 254, 0.5)'
+            textShadow: '0 0 15px rgba(188, 19, 254, 0.8)'
           }}>
             The Lost City of Crypto Phenomena
           </h2>
 
           <p style={{
-            maxWidth: '600px',
+            maxWidth: '650px',
             margin: '0 auto',
-            color: 'rgba(224, 255, 205, 0.6)',
-            lineHeight: '1.6',
-            fontSize: '1.1rem'
+            color: 'rgba(224, 255, 205, 0.7)',
+            lineHeight: '1.8',
+            fontSize: '1.1rem',
+            letterSpacing: '0.05em'
           }}>
-            Ancient gates guard the entrance to Bitlanta, where crypto legends are born
-            and digital treasures await. Only those who possess the sacred knowledge
-            may enter.
+            Beneath the digital waves of the old world lies Bitlanta.
+            A haven for elite agents, rogue algorithms, and the most
+            advanced crypto intelligence ever discovered.
           </p>
         </div>
 
         {/* FEED SECTION */}
-        <div style={{ width: '100%', marginBottom: '5rem' }}>
+        <div style={{
+          width: '100%',
+          marginBottom: '5rem',
+          background: 'rgba(255,255,255,0.02)',
+          padding: '2rem',
+          borderRadius: '24px',
+          border: '1px solid rgba(57, 255, 20, 0.1)',
+          boxShadow: 'inset 0 0 50px rgba(0,0,0,0.5)'
+        }}>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -117,36 +153,73 @@ export default function Home() {
             paddingBottom: '1rem'
           }}>
             <h2 style={{
-              fontSize: '2rem',
+              fontSize: '1.8rem',
               color: '#fff',
-              margin: 0
+              margin: 0,
+              letterSpacing: '2px'
             }}>
               System Transmissions
             </h2>
-            <span style={{ color: 'var(--neon-green)', fontSize: '0.9rem', letterSpacing: '0.1em' }}>
-              ● LIVE FEED
+            <span style={{
+              color: 'var(--neon-green)',
+              fontSize: '0.8rem',
+              letterSpacing: '0.2em',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <span style={{
+                width: '8px',
+                height: '8px',
+                background: 'var(--neon-green)',
+                borderRadius: '50%',
+                boxShadow: '0 0 10px var(--neon-green)',
+                animation: 'flicker 1s infinite'
+              }} />
+              LIVE FEED
             </span>
           </div>
           <SignalFeed />
         </div>
 
-        <Link href="/login" style={{
-          padding: '1.25rem 3rem',
+        <Link href="/login" className="agent-btn" style={{
+          padding: '1.5rem 4rem',
           background: 'transparent',
           border: '2px solid var(--neon-green)',
           color: 'var(--neon-green)',
           textTransform: 'uppercase',
-          letterSpacing: '3px',
-          fontWeight: 800,
-          borderRadius: '50px',
+          letterSpacing: '5px',
+          fontWeight: 900,
+          borderRadius: '4px', // Harder retro edges
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          position: 'relative',
-          overflow: 'hidden',
+          boxShadow: '0 0 20px rgba(57, 255, 20, 0.2)',
           zIndex: 10
         }}>
-          Agent Access
+          Initiate Agent Access
         </Link>
       </main>
+
+      <style jsx>{`
+        @keyframes flicker {
+          0%, 100% { opacity: 1; }
+          41% { opacity: 1; }
+          42% { opacity: 0.3; }
+          43% { opacity: 1; }
+          52% { opacity: 1; }
+          53% { opacity: 0.1; }
+          54% { opacity: 1; }
+        }
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 0 20px var(--neon-green); transform: scale(1); }
+          50% { box-shadow: 0 0 40px var(--neon-green); transform: scale(1.02); }
+        }
+        .agent-btn:hover {
+          background: var(--neon-green);
+          color: #050214;
+          box-shadow: 0 0 50px var(--neon-green);
+          transform: translateY(-5px);
+        }
+      `}</style>
 
       <footer style={{
         marginTop: 'auto',
