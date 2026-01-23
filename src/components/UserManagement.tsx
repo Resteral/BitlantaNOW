@@ -46,50 +46,52 @@ export default function UserManagement() {
         }
     };
 
-    if (loading) return <div style={{ opacity: 0.5 }}>SYNCHRONIZING USER DATA...</div>;
-    if (error) return <div style={{ color: '#ff4d4d' }}>ERROR: {error}</div>;
+    if (loading) return <div style={{ opacity: 0.5, fontStyle: 'italic', letterSpacing: '2px' }}>DECRYPTING USER RECORDS...</div>;
+    if (error) return <div style={{ color: 'var(--vw-magenta)', textShadow: '0 0 10px var(--vw-magenta)' }}>ERROR: {error}</div>;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div style={{
                 maxHeight: '400px',
                 overflowY: 'auto',
-                paddingRight: '0.5rem'
+                paddingRight: '1rem'
             }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
                     <thead>
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', textAlign: 'left' }}>
-                            <th style={{ padding: '0.5rem', opacity: 0.6 }}>USER ID</th>
-                            <th style={{ padding: '0.5rem', opacity: 0.6 }}>CURRENT TIER</th>
-                            <th style={{ padding: '0.5rem', opacity: 0.6 }}>ACTION</th>
+                            <th style={{ padding: '0.8rem', color: '#fff', fontWeight: 700, letterSpacing: '2px' }}>ID</th>
+                            <th style={{ padding: '0.8rem', color: '#fff', fontWeight: 700, letterSpacing: '2px' }}>TIER</th>
+                            <th style={{ padding: '0.8rem', color: '#fff', fontWeight: 700, letterSpacing: '2px' }}>ACCESS</th>
                         </tr>
                     </thead>
                     <tbody>
                         {users.map(user => (
-                            <tr key={user.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                <td style={{ padding: '0.75rem 0.5rem', fontFamily: 'monospace' }}>
-                                    {user.id.slice(0, 8)}...
+                            <tr key={user.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                <td style={{ padding: '1rem 0.8rem', fontFamily: 'monospace', opacity: 0.5 }}>
+                                    {user.id.slice(0, 8)}
                                 </td>
-                                <td style={{ padding: '0.75rem 0.5rem' }}>
+                                <td style={{ padding: '1rem 0.8rem' }}>
                                     <span style={{
                                         color: getTierColor(user.tier),
-                                        fontWeight: 'bold',
-                                        textShadow: `0 0 5px ${getTierColor(user.tier)}44`
+                                        fontWeight: 900,
+                                        textShadow: `0 0 10px ${getTierColor(user.tier)}66`
                                     }}>
                                         {user.tier}
                                     </span>
                                 </td>
-                                <td style={{ padding: '0.75rem 0.5rem' }}>
+                                <td style={{ padding: '1rem 0.8rem' }}>
                                     <select
                                         value={user.tier}
                                         onChange={(e) => updateTier(user.id, e.target.value)}
                                         style={{
-                                            background: 'rgba(0,0,0,0.5)',
-                                            border: '1px solid var(--foreground)',
-                                            color: 'var(--foreground)',
-                                            padding: '0.2rem',
-                                            fontSize: '0.75rem',
-                                            cursor: 'pointer'
+                                            background: 'rgba(0,0,0,0.3)',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            color: '#fff',
+                                            padding: '0.4rem 0.6rem',
+                                            fontSize: '0.7rem',
+                                            cursor: 'pointer',
+                                            borderRadius: '8px',
+                                            outline: 'none'
                                         }}
                                     >
                                         <option value="FREE">FREE</option>
@@ -103,35 +105,46 @@ export default function UserManagement() {
                     </tbody>
                 </table>
                 {users.length === 0 && (
-                    <div style={{ padding: '2rem', textAlign: 'center', opacity: 0.3 }}>
-                        NO USERS REGISTERED
+                    <div style={{ padding: '4rem', textAlign: 'center', opacity: 0.3, fontStyle: 'italic' }}>
+                        VACANT MEMORY SLOTS
                     </div>
                 )}
             </div>
 
             <button
                 onClick={fetchUsers}
+                className="vapor-sub-btn"
                 style={{
-                    background: 'transparent',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    color: 'rgba(255,255,255,0.5)',
-                    padding: '0.5rem',
-                    fontSize: '0.7rem',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'rgba(255,255,255,0.7)',
+                    padding: '0.6rem 1.2rem',
+                    fontSize: '0.65rem',
                     cursor: 'pointer',
-                    alignSelf: 'flex-start'
+                    alignSelf: 'flex-start',
+                    borderRadius: '100px',
+                    letterSpacing: '2px',
+                    transition: 'all 0.3s ease'
                 }}
             >
-                REFRESH REGISTER
+                REFRESH DATA
             </button>
+            <style jsx>{`
+                .vapor-sub-btn:hover {
+                    background: rgba(255,113,206,0.1);
+                    border-color: var(--vw-magenta);
+                    color: #fff;
+                }
+            `}</style>
         </div>
     );
 }
 
 function getTierColor(tier: string) {
     switch (tier) {
-        case 'GOLD': return '#ffd700';
-        case 'SILVER': return '#c0c0c0';
-        case 'BRONZE': return '#cd7f32';
-        default: return 'var(--neon-green)';
+        case 'GOLD': return 'var(--vw-yellow)';
+        case 'SILVER': return 'var(--vw-cyan)';
+        case 'BRONZE': return 'var(--vw-magenta)';
+        default: return 'var(--vw-blue)';
     }
 }

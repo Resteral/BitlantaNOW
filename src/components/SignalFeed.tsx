@@ -65,17 +65,20 @@ export default function SignalFeed() {
 
     if (loading) return (
         <div style={{
-            color: 'var(--neon-green)',
+            color: 'var(--vw-cyan)',
             textAlign: 'center',
-            padding: '2rem',
-            letterSpacing: '0.2em',
-            animation: 'pulse 1.5s infinite'
+            padding: '4rem',
+            letterSpacing: '0.4em',
+            fontSize: '0.8rem',
+            fontWeight: 300,
+            fontStyle: 'italic',
+            animation: 'vapor-pulse 2s infinite ease-in-out'
         }}>
-            SCANNING FREQUENCIES...
+            DECRYPTING DREAMSCAPES...
             <style jsx>{`
-                @keyframes pulse {
-                    0%, 100% { opacity: 0.5; }
-                    50% { opacity: 1; text-shadow: 0 0 10px var(--neon-green); }
+                @keyframes vapor-pulse {
+                    0%, 100% { opacity: 0.3; transform: scale(0.98); }
+                    50% { opacity: 0.8; transform: scale(1); text-shadow: 0 0 20px var(--vw-cyan); }
                 }
             `}</style>
         </div>
@@ -83,15 +86,18 @@ export default function SignalFeed() {
 
     if (signals.length === 0) return (
         <div style={{
-            color: 'var(--text-dim)',
+            color: 'rgba(255, 255, 255, 0.4)',
             textAlign: 'center',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            background: 'rgba(255, 255, 255, 0.02)',
-            padding: '3rem',
-            borderRadius: '16px',
-            backdropFilter: 'blur(5px)'
+            border: '1px solid rgba(255, 113, 206, 0.1)',
+            background: 'rgba(255, 113, 206, 0.02)',
+            padding: '4rem',
+            borderRadius: '30px',
+            backdropFilter: 'blur(10px)',
+            letterSpacing: '2px',
+            fontSize: '0.9rem',
+            fontStyle: 'italic'
         }}>
-            NO ACTIVE GATES DETECTED
+            NO TRANSMISSIONS FOUND IN THE ETHER
         </div>
     );
 

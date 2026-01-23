@@ -38,13 +38,20 @@ export default function DashboardPage() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 background: '#050214',
-                color: 'var(--neon-green)',
-                fontFamily: 'monospace',
-                fontSize: '1.5rem',
+                color: 'var(--vw-cyan)',
+                fontStyle: 'italic',
+                fontSize: '1.2rem',
                 textTransform: 'uppercase',
-                letterSpacing: '2px'
+                letterSpacing: '5px',
+                animation: 'vapor-pulse 2s infinite ease-in-out'
             }}>
                 Accessing BitLanta Network...
+                <style jsx>{`
+                    @keyframes vapor-pulse {
+                        0%, 100% { opacity: 0.3; }
+                        50% { opacity: 1; text-shadow: 0 0 20px var(--vw-cyan); }
+                    }
+                `}</style>
             </div>
         );
     }
@@ -52,111 +59,149 @@ export default function DashboardPage() {
     return (
         <div style={{
             minHeight: '100vh',
-            padding: '2rem',
+            padding: '3rem 2rem',
             color: '#fff',
-            maxWidth: '1400px', // Wider for more panels
+            maxWidth: '1600px',
             margin: '0 auto',
-            background: 'radial-gradient(circle at 50% 10%, rgba(188, 19, 254, 0.1) 0%, transparent 50%)'
+            position: 'relative'
         }}>
+            {/* Background elements */}
+            <div className="perspective-grid" style={{ opacity: 0.1 }}>
+                <div className="grid-content"></div>
+            </div>
+
             <header style={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '3rem',
-                borderBottom: '1px solid rgba(57, 255, 20, 0.3)',
-                paddingBottom: '1rem'
+                marginBottom: '4rem',
+                borderBottom: '1px solid rgba(255, 113, 206, 0.1)',
+                paddingBottom: '1.5rem',
+                position: 'relative',
+                zIndex: 10
             }}>
                 <div>
                     <h1 style={{
                         margin: 0,
                         textTransform: 'uppercase',
-                        letterSpacing: '4px',
-                        fontSize: '1.5rem',
-                        color: 'var(--neon-green)'
+                        letterSpacing: '8px',
+                        fontSize: '1.2rem',
+                        color: 'var(--vw-cyan)',
+                        fontWeight: 900,
+                        fontStyle: 'italic'
                     }}>
-                        Central Intelligence // Terminal
+                        Central Terminal // Control
                     </h1>
-                    <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '0.2rem' }}>
-                        SECURE CONNECTION ESTABLISHED
+                    <div style={{ fontSize: '0.65rem', color: 'var(--vw-magenta)', letterSpacing: '3px', marginTop: '0.4rem', fontWeight: 700 }}>
+                        <span className="dot-pulse" style={{ display: 'inline-block', marginRight: '0.5rem' }} />
+                        ENCRYPTED UPLINK ESTABLISHED
                     </div>
                 </div>
                 <button
                     onClick={handleLogout}
+                    className="vapor-logout-btn"
                     style={{
-                        background: 'rgba(255, 77, 77, 0.1)',
-                        border: '1px solid #ff4d4d',
-                        color: '#ff4d4d',
-                        padding: '0.5rem 1.5rem',
+                        background: 'rgba(255, 113, 206, 0.05)',
+                        border: '1px solid rgba(255, 113, 206, 0.3)',
+                        color: 'var(--vw-magenta)',
+                        padding: '0.6rem 2rem',
                         cursor: 'pointer',
                         fontFamily: 'inherit',
                         textTransform: 'uppercase',
-                        fontSize: '0.8rem',
-                        fontWeight: 'bold',
-                        borderRadius: '4px',
+                        fontSize: '0.7rem',
+                        fontWeight: 900,
+                        borderRadius: '100px',
+                        letterSpacing: '2px',
                         transition: 'all 0.3s ease'
                     }}
                 >
-                    Disconnect
+                    Shutdown
                 </button>
             </header>
 
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-                gap: '2rem'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+                gap: '2.5rem',
+                position: 'relative',
+                zIndex: 10
             }}>
                 {/* Panel 1: Signals Form */}
                 <div style={panelStyle}>
-                    <h2 style={panelTitleStyle}>Broadcast Signal</h2>
-                    <p style={panelDescStyle}>Initialize new trading parameters.</p>
+                    <h2 style={panelTitleStyle}>Initialize Broadcast</h2>
+                    <p style={panelDescStyle}>Set new data streams for the network.</p>
                     <CreateSignalForm />
                 </div>
 
                 {/* Panel 2: Signal History */}
                 <div style={panelStyle}>
-                    <h2 style={panelTitleStyle}>Transmission History</h2>
-                    <p style={panelDescStyle}>Manage active and historical signals.</p>
+                    <h2 style={panelTitleStyle}>Ether History</h2>
+                    <p style={panelDescStyle}>Archived transmissions and active flows.</p>
                     <SignalManagement />
                 </div>
 
                 {/* Panel 3: User Management */}
                 <div style={panelStyle}>
-                    <h2 style={panelTitleStyle}>Node Registry</h2>
-                    <p style={panelDescStyle}>Manage agent access tiers and permissions.</p>
+                    <h2 style={panelTitleStyle}>Registry Nodes</h2>
+                    <p style={panelDescStyle}>Agent authorization levels and protocols.</p>
                     <UserManagement />
                 </div>
 
                 {/* Panel 4: Bot Status */}
-                <div style={{ ...panelStyle, borderColor: 'var(--neon-purple)' }}>
+                <div style={{ ...panelStyle, background: 'transparent', border: 'none', boxShadow: 'none', padding: 0 }}>
                     <TradingBot />
                 </div>
             </div>
+
+            <style jsx>{`
+                .vapor-logout-btn:hover {
+                    background: rgba(255, 113, 206, 0.15);
+                    border-color: var(--vw-magenta);
+                    box-shadow: 0 0 20px rgba(255, 113, 206, 0.3);
+                }
+                .dot-pulse {
+                    width: 6px;
+                    height: 6px;
+                    background: var(--vw-magenta);
+                    border-radius: 50%;
+                    animation: pulse 2s infinite;
+                }
+                @keyframes pulse {
+                    0% { transform: scale(1); opacity: 1; }
+                    50% { transform: scale(1.5); opacity: 0.5; }
+                    100% { transform: scale(1); opacity: 1; }
+                }
+            `}</style>
         </div >
     );
 }
 
 const panelStyle = {
-    border: '1px solid rgba(57, 255, 20, 0.2)',
-    padding: '1.5rem',
-    background: 'rgba(5, 2, 20, 0.4)',
-    backdropFilter: 'blur(10px)',
-    borderRadius: '12px',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+    padding: '2.5rem',
+    background: 'rgba(26, 11, 46, 0.3)',
+    backdropFilter: 'blur(20px)',
+    borderRadius: '40px',
+    border: '1px solid rgba(255, 255, 255, 0.05)',
+    boxShadow: '0 20px 50px rgba(0, 0, 0, 0.3)',
     display: 'flex',
-    flexDirection: 'column' as 'column'
+    flexDirection: 'column' as 'column',
+    transition: 'transform 0.3s ease'
 };
 
 const panelTitleStyle = {
     marginTop: 0,
-    marginBottom: '0.5rem',
-    fontSize: '1.1rem',
+    marginBottom: '0.8rem',
+    fontSize: '1.4rem',
+    fontWeight: 300,
+    letterSpacing: '4px',
     textTransform: 'uppercase' as 'uppercase',
-    letterSpacing: '2px',
-    color: '#fff'
+    color: '#fff',
+    fontStyle: 'italic'
 };
 
 const panelDescStyle = {
-    opacity: 0.5,
-    fontSize: '0.8rem',
-    marginBottom: '1.5rem'
+    opacity: 0.4,
+    fontSize: '0.75rem',
+    marginBottom: '2.5rem',
+    letterSpacing: '1px'
 };

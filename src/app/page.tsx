@@ -13,11 +13,17 @@ export default function Home() {
       alignItems: 'center',
       paddingBottom: '4rem',
       position: 'relative',
-      overflow: 'hidden' // For background overflow
+      overflow: 'hidden'
     }}>
       <MarketTicker />
 
-      {/* ATMOSPHERIC BACKGROUND */}
+      {/* VAPORWAVE ELEMENTS */}
+      <div className="perspective-grid">
+        <div className="grid-content"></div>
+      </div>
+      <div className="vapor-sun"></div>
+
+      {/* ATMOSPHERIC BLOOM */}
       <div style={{
         position: 'absolute',
         top: 0,
@@ -26,10 +32,10 @@ export default function Home() {
         bottom: 0,
         zIndex: 0,
         pointerEvents: 'none',
-        background: 'radial-gradient(circle at 50% 30%, rgba(57, 255, 20, 0.05) 0%, transparent 70%), radial-gradient(circle at 80% 80%, rgba(188, 19, 254, 0.05) 0%, transparent 50%)'
+        background: 'radial-gradient(circle at 50% 35%, rgba(255, 113, 206, 0.15) 0%, transparent 60%)'
       }} />
 
-      {/* SCANLINES OVERLAY */}
+      {/* SCANLINES */}
       <div style={{
         position: 'absolute',
         top: 0,
@@ -38,9 +44,9 @@ export default function Home() {
         bottom: 0,
         zIndex: 10,
         pointerEvents: 'none',
-        background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
-        backgroundSize: '100% 2px, 3px 100%',
-        opacity: 0.3
+        background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%)',
+        backgroundSize: '100% 4px',
+        opacity: 0.5
       }} />
 
       <main style={{
@@ -48,189 +54,203 @@ export default function Home() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '4rem 2rem',
+        padding: '6rem 2rem',
         maxWidth: '1200px',
         width: '100%',
         zIndex: 1
       }}>
 
         {/* HERO SECTION */}
-        <div style={{ textAlign: 'center', marginBottom: '6rem', position: 'relative' }}>
+        <div style={{ textAlign: 'center', marginBottom: '8rem', position: 'relative' }}>
           <div style={{ position: 'relative', display: 'inline-block' }}>
-            {/* Retro City Silhouette */}
-            <div style={{
-              position: 'absolute',
-              bottom: '95%',
-              left: '26%',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              alignItems: 'flex-end',
-              gap: '2px',
-              zIndex: 0,
-              opacity: 0.9,
-              pointerEvents: 'none',
-              filter: 'drop-shadow(0 0 15px var(--neon-purple))'
-            }}>
-              {/* Cityscape Nodes */}
-              <div style={{ width: '8px', height: '30px', background: 'var(--neon-green)', animation: 'flicker 3s infinite' }}></div>
-              <div style={{ width: '15px', height: '55px', background: 'var(--neon-purple)', animation: 'flicker 4s infinite' }}></div>
-              <div style={{ width: '10px', height: '40px', background: 'var(--neon-green)', animation: 'flicker 5s infinite' }}></div>
-              <div style={{ width: '6px', height: '25px', background: 'var(--neon-purple)', animation: 'flicker 2.5s infinite' }}></div>
-              <div style={{
-                width: '20px',
-                height: '25px',
-                background: 'var(--neon-green)',
-                borderRadius: '50% 50% 0 0',
-                animation: 'flicker 6s infinite'
-              }}></div>
-            </div>
-
-            <h1 style={{
-              fontSize: 'min(5rem, 12vw)',
+            <h1 className="glitch-title" style={{
+              fontSize: 'min(6rem, 15vw)',
               fontWeight: 900,
-              letterSpacing: '-0.05em',
+              letterSpacing: '-0.02em',
               display: 'inline-flex',
               alignItems: 'center',
               marginBottom: '1rem',
-              filter: 'drop-shadow(0 0 30px rgba(57, 255, 20, 0.4))'
+              color: '#fff',
+              textShadow: '3px 3px var(--vw-magenta), -3px -3px var(--vw-cyan)'
             }}>
-              {/* "BIT" Box */}
-              <span className="bit-box" style={{
-                background: 'var(--neon-green)',
-                color: '#050214',
-                padding: '0 0.5rem',
-                marginRight: '0.2rem',
-                borderRadius: '8px',
-                border: '2px solid rgba(255,255,255,0.4)',
-                boxShadow: '0 0 20px var(--neon-green)',
-                animation: 'pulse-glow 2s infinite ease-in-out'
+              {/* "BIT" Box - Softened */}
+              <span style={{
+                background: 'linear-gradient(45deg, var(--vw-magenta), var(--vw-cyan))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                padding: '0 0.2rem',
+                marginRight: '0.1rem',
+                filter: 'drop-shadow(0 0 10px var(--vw-magenta))'
               }}>BIT</span>
-              <span style={{ color: '#fff' }}>LANTA</span>
+              <span style={{ position: 'relative' }}>
+                LANTA
+                <span style={{
+                  position: 'absolute',
+                  bottom: '-10px',
+                  left: 0,
+                  width: '100%',
+                  height: '2px',
+                  background: 'linear-gradient(90deg, transparent, var(--vw-cyan), transparent)',
+                  filter: 'blur(2px)'
+                }}></span>
+              </span>
             </h1>
           </div>
 
           <h2 style={{
-            fontSize: '1.5rem',
-            color: 'var(--neon-purple)',
-            fontWeight: 500,
+            fontSize: '1.2rem',
+            color: 'var(--vw-cyan)',
+            fontWeight: 400,
             textTransform: 'uppercase',
-            letterSpacing: '0.3em',
-            marginBottom: '2rem',
-            textShadow: '0 0 15px rgba(188, 19, 254, 0.8)'
+            letterSpacing: '0.5em',
+            marginBottom: '3rem',
+            textShadow: '0 0 10px var(--vw-cyan)',
+            fontStyle: 'italic'
           }}>
-            The Lost City of Crypto Phenomena
+            Est. 1984 // Digital Paradise
           </h2>
 
           <p style={{
-            maxWidth: '650px',
+            maxWidth: '700px',
             margin: '0 auto',
-            color: 'rgba(224, 255, 205, 0.7)',
-            lineHeight: '1.8',
-            fontSize: '1.1rem',
-            letterSpacing: '0.05em'
+            color: 'rgba(255, 255, 255, 0.8)',
+            lineHeight: '2',
+            fontSize: '1.2rem',
+            letterSpacing: '0.1em',
+            fontWeight: 300,
+            fontStyle: 'italic',
+            textShadow: '0 0 20px rgba(255, 255, 255, 0.2)'
           }}>
-            Beneath the digital waves of the old world lies Bitlanta.
-            A haven for elite agents, rogue algorithms, and the most
-            advanced crypto intelligence ever discovered.
+            Experience the nostalgic glow of the lost city.
+            Where data streams meet dreamscapes, and the
+            future is always yesterday.
           </p>
         </div>
 
         {/* FEED SECTION */}
         <div style={{
           width: '100%',
-          marginBottom: '5rem',
-          background: 'rgba(255,255,255,0.02)',
-          padding: '2rem',
-          borderRadius: '24px',
-          border: '1px solid rgba(57, 255, 20, 0.1)',
-          boxShadow: 'inset 0 0 50px rgba(0,0,0,0.5)'
+          marginBottom: '6rem',
+          background: 'rgba(26, 11, 46, 0.3)',
+          padding: '3rem',
+          borderRadius: '40px',
+          border: '1px solid rgba(255, 113, 206, 0.2)',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.3), inset 0 0 30px rgba(255,113,206,0.1)'
         }}>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            marginBottom: '2rem',
-            borderBottom: '1px solid rgba(57, 255, 20, 0.3)',
-            paddingBottom: '1rem'
+            alignItems: 'center',
+            marginBottom: '3rem',
+            borderBottom: '1px solid rgba(255, 113, 206, 0.1)',
+            paddingBottom: '1.5rem'
           }}>
             <h2 style={{
-              fontSize: '1.8rem',
+              fontSize: '1.5rem',
               color: '#fff',
               margin: 0,
-              letterSpacing: '2px'
+              letterSpacing: '4px',
+              textTransform: 'uppercase',
+              fontWeight: 300
             }}>
-              System Transmissions
+              Direct Transmissions
             </h2>
-            <span style={{
-              color: 'var(--neon-green)',
-              fontSize: '0.8rem',
-              letterSpacing: '0.2em',
+            <div style={{
+              color: 'var(--vw-magenta)',
+              fontSize: '0.75rem',
+              letterSpacing: '0.3em',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.75rem',
+              fontWeight: 700
             }}>
-              <span style={{
-                width: '8px',
-                height: '8px',
-                background: 'var(--neon-green)',
-                borderRadius: '50%',
-                boxShadow: '0 0 10px var(--neon-green)',
-                animation: 'flicker 1s infinite'
-              }} />
-              LIVE FEED
-            </span>
+              <span className="dot-pulse" />
+              CONNECTED
+            </div>
           </div>
           <SignalFeed />
         </div>
 
-        <Link href="/login" className="agent-btn" style={{
-          padding: '1.5rem 4rem',
-          background: 'transparent',
-          border: '2px solid var(--neon-green)',
-          color: 'var(--neon-green)',
+        <Link href="/login" className="vapor-btn" style={{
+          padding: '1.5rem 5rem',
+          background: 'linear-gradient(45deg, var(--vw-magenta), var(--vw-cyan))',
+          color: '#fff',
           textTransform: 'uppercase',
-          letterSpacing: '5px',
+          letterSpacing: '6px',
           fontWeight: 900,
-          borderRadius: '4px', // Harder retro edges
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: '0 0 20px rgba(57, 255, 20, 0.2)',
-          zIndex: 10
+          borderRadius: '100px',
+          transition: 'all 0.5s cubic-bezier(0.23, 1, 0.32, 1)',
+          boxShadow: '0 10px 40px rgba(255, 113, 206, 0.4)',
+          zIndex: 10,
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          Initiate Agent Access
+          <span style={{ position: 'relative', zIndex: 1 }}>Initialize Access</span>
         </Link>
       </main>
 
       <style jsx>{`
-        @keyframes flicker {
-          0%, 100% { opacity: 1; }
-          41% { opacity: 1; }
-          42% { opacity: 0.3; }
-          43% { opacity: 1; }
-          52% { opacity: 1; }
-          53% { opacity: 0.1; }
-          54% { opacity: 1; }
+        .glitch-title {
+          animation: glitch 5s infinite;
         }
-        @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 20px var(--neon-green); transform: scale(1); }
-          50% { box-shadow: 0 0 40px var(--neon-green); transform: scale(1.02); }
+
+        @keyframes glitch {
+          0% { text-shadow: 3px 3px var(--vw-magenta), -3px -3px var(--vw-cyan); }
+          5% { text-shadow: -3px 3px var(--vw-magenta), 3px -3px var(--vw-cyan); }
+          10% { text-shadow: 3px -3px var(--vw-magenta), -3px 3px var(--vw-cyan); }
+          15% { text-shadow: 2px 2px var(--vw-magenta), -2px -2px var(--vw-cyan); }
+          100% { text-shadow: 3px 3px var(--vw-magenta), -3px -3px var(--vw-cyan); }
         }
-        .agent-btn:hover {
-          background: var(--neon-green);
-          color: #050214;
-          box-shadow: 0 0 50px var(--neon-green);
-          transform: translateY(-5px);
+
+        .dot-pulse {
+          width: 10px;
+          height: 10px;
+          background: var(--vw-magenta);
+          border-radius: 50%;
+          box-shadow: 0 0 15px var(--vw-magenta);
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.5); opacity: 0.5; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+
+        .vapor-btn:hover {
+          transform: translateY(-8px) scale(1.05);
+          box-shadow: 0 20px 60px rgba(255, 113, 206, 0.6);
+          letter-spacing: 8px;
+        }
+
+        .vapor-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+          transition: 0.5s;
+        }
+
+        .vapor-btn:hover::before {
+          left: 100%;
         }
       `}</style>
 
       <footer style={{
         marginTop: 'auto',
-        fontSize: '0.8rem',
-        opacity: 0.5,
+        fontSize: '0.7rem',
+        opacity: 0.4,
         textAlign: 'center',
-        padding: '2rem',
-        color: 'var(--pale-green)'
+        padding: '3rem',
+        color: '#fff',
+        letterSpacing: '3px',
+        textTransform: 'uppercase'
       }}>
-        &copy; 2026 BITLANTA. ALL RIGHTS RESERVED.
+        &copy; 1984 - 2026 BITLANTA SYSTEM. ALL RIGHTS RESERVED.
       </footer>
     </div>
   );

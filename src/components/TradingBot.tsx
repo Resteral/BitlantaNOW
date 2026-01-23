@@ -69,47 +69,52 @@ export default function TradingBot() {
         }
     };
 
-    if (loading) return <div>INITIALIZING BOT SYSTEMS...</div>;
+    if (loading) return <div style={{ opacity: 0.5, fontStyle: 'italic', letterSpacing: '2px' }}>AWAKENING BOT CORE...</div>;
 
     return (
         <div style={{
-            padding: '2rem',
-            background: 'rgba(26, 11, 46, 0.8)',
-            borderRadius: '20px',
-            border: '1px solid var(--neon-purple)',
-            boxShadow: '0 0 30px rgba(188, 19, 254, 0.2)',
+            padding: '3rem',
+            background: 'rgba(26, 11, 46, 0.4)',
+            backdropFilter: 'blur(30px)',
+            borderRadius: '40px',
+            border: '1px solid rgba(255, 113, 206, 0.2)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
             maxWidth: '600px',
             width: '100%'
         }}>
-            <h3 style={{ color: 'var(--neon-green)', marginBottom: '1.5rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
-                Solana Meme Bot Console
+            <h3 style={{ color: '#fff', marginBottom: '2.5rem', textTransform: 'uppercase', letterSpacing: '4px', fontWeight: 300, fontSize: '1.2rem', textAlign: 'center' }}>
+                Ether-Bot Console
             </h3>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
                 <div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>BOT STATUS</div>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 800, color: settings?.is_active ? 'var(--neon-green)' : '#ff4d4d' }}>
-                        {settings?.is_active ? '● OPERATIONAL' : '○ STANDBY'}
+                    <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', letterSpacing: '2px', fontWeight: 700, marginBottom: '0.5rem' }}>SYSTEM_STATUS</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 900, color: settings?.is_active ? 'var(--vw-blue)' : 'var(--vw-magenta)', letterSpacing: '1px' }}>
+                        {settings?.is_active ? '● ONLINE' : '○ ASLEEP'}
                     </div>
                 </div>
                 <button
                     onClick={toggleBot}
+                    className="vapor-toggle-btn"
                     style={{
-                        padding: '0.8rem 1.5rem',
-                        background: settings?.is_active ? 'rgba(255, 77, 77, 0.1)' : 'rgba(57, 255, 20, 0.1)',
-                        border: `1px solid ${settings?.is_active ? '#ff4d4d' : 'var(--neon-green)'}`,
-                        color: settings?.is_active ? '#ff4d4d' : 'var(--neon-green)',
-                        borderRadius: '8px',
+                        padding: '1rem 2rem',
+                        background: settings?.is_active ? 'rgba(255, 113, 206, 0.1)' : 'rgba(1, 205, 254, 0.1)',
+                        border: `1px solid ${settings?.is_active ? 'var(--vw-magenta)' : 'var(--vw-cyan)'}`,
+                        color: settings?.is_active ? 'var(--vw-magenta)' : 'var(--vw-cyan)',
+                        borderRadius: '100px',
                         cursor: 'pointer',
-                        fontWeight: 800
+                        fontWeight: 900,
+                        fontSize: '0.7rem',
+                        letterSpacing: '2px',
+                        transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                     }}
                 >
-                    {settings?.is_active ? 'DEACTIVATE' : 'ACTIVATE'}
+                    {settings?.is_active ? 'SHUTDOWN' : 'BOOT UP'}
                 </button>
             </div>
 
-            <div style={{ marginBottom: '2rem' }}>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '0.5rem' }}>DEFAULT TRADE AMOUNT (USDC)</div>
+            <div style={{ marginBottom: '3rem' }}>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginBottom: '0.8rem', letterSpacing: '2px', fontWeight: 700 }}>TRANSMISSION_MAGNITUDE (USDC)</div>
                 <input
                     type="number"
                     value={settings?.default_trade_amount}
@@ -118,35 +123,50 @@ export default function TradingBot() {
                         width: '100%',
                         background: 'rgba(0,0,0,0.3)',
                         border: '1px solid rgba(255,255,255,0.1)',
-                        padding: '1rem',
+                        padding: '1.2rem',
                         color: '#fff',
-                        borderRadius: '8px',
-                        fontSize: '1.1rem'
+                        borderRadius: '16px',
+                        fontSize: '1rem',
+                        outline: 'none',
+                        textAlign: 'center',
+                        letterSpacing: '4px',
+                        fontWeight: 300
                     }}
                 />
             </div>
 
             <div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '1rem' }}>RECENT TRANSMISSIONS</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginBottom: '1.5rem', letterSpacing: '2px', fontWeight: 700 }}>PAST_TRANSMISSIONS</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {trades.map(trade => (
                         <div key={trade.id} style={{
-                            padding: '0.75rem',
-                            background: 'rgba(255,255,255,0.03)',
-                            borderRadius: '6px',
-                            fontSize: '0.8rem',
+                            padding: '1rem 1.2rem',
+                            background: 'rgba(255,255,255,0.02)',
+                            borderRadius: '12px',
+                            fontSize: '0.75rem',
                             display: 'flex',
-                            justifyContent: 'space-between'
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            border: '1px solid rgba(255,255,255,0.03)'
                         }}>
-                            <span>{trade.type} {trade.pair} @ ${trade.price}</span>
-                            <span style={{ color: trade.type === 'BUY' ? 'var(--neon-green)' : '#ff4d4d' }}>
+                            <span style={{ fontWeight: 300, fontStyle: 'italic' }}>
+                                <span style={{ color: trade.type === 'BUY' ? 'var(--vw-cyan)' : 'var(--vw-magenta)', fontWeight: 900, marginRight: '0.5rem' }}>{trade.type}</span>
+                                {trade.pair}
+                            </span>
+                            <span style={{ color: trade.type === 'BUY' ? 'var(--vw-cyan)' : 'var(--vw-magenta)', fontWeight: 900, letterSpacing: '1px' }}>
                                 ${trade.total_val}
                             </span>
                         </div>
                     ))}
-                    {trades.length === 0 && <div style={{ opacity: 0.3 }}>NO TRADES LOGGED</div>}
+                    {trades.length === 0 && <div style={{ opacity: 0.3, padding: '2rem', textAlign: 'center', fontStyle: 'italic' }}>MEMORIES ARE BLANK</div>}
                 </div>
             </div>
+            <style jsx>{`
+                .vapor-toggle-btn:hover {
+                    transform: scale(1.05);
+                    box-shadow: 0 0 20px ${settings?.is_active ? 'rgba(255, 113, 206, 0.4)' : 'rgba(1, 205, 254, 0.4)'};
+                }
+            `}</style>
         </div>
     );
 }

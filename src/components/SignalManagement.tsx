@@ -70,53 +70,55 @@ export default function SignalManagement() {
         }
     };
 
-    if (loading) return <div style={{ opacity: 0.5 }}>FETCHING SIGNAL HISTORY...</div>;
-    if (error) return <div style={{ color: '#ff4d4d' }}>ERROR: {error}</div>;
+    if (loading) return <div style={{ opacity: 0.5, fontStyle: 'italic', letterSpacing: '2px' }}>INTERCEPTING SIGNALS...</div>;
+    if (error) return <div style={{ color: 'var(--vw-magenta)', textShadow: '0 0 10px var(--vw-magenta)' }}>ERROR: {error}</div>;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div style={{
                 maxHeight: '400px',
                 overflowY: 'auto',
-                paddingRight: '0.5rem'
+                paddingRight: '1rem'
             }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
                     <thead>
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', textAlign: 'left' }}>
-                            <th style={{ padding: '0.5rem', opacity: 0.6 }}>PAIR</th>
-                            <th style={{ padding: '0.5rem', opacity: 0.6 }}>STATUS</th>
-                            <th style={{ padding: '0.5rem', opacity: 0.6 }}>ACTIONS</th>
+                            <th style={{ padding: '0.8rem', color: '#fff', fontWeight: 700, letterSpacing: '2px' }}>PAIR</th>
+                            <th style={{ padding: '0.8rem', color: '#fff', fontWeight: 700, letterSpacing: '2px' }}>STATUS</th>
+                            <th style={{ padding: '0.8rem', color: '#fff', fontWeight: 700, letterSpacing: '2px' }}>ACTION</th>
                         </tr>
                     </thead>
                     <tbody>
                         {signals.map(signal => (
-                            <tr key={signal.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                <td style={{ padding: '0.75rem 0.5rem' }}>
-                                    <div style={{ fontWeight: 'bold' }}>{signal.pair}</div>
-                                    <div style={{ fontSize: '0.7rem', opacity: 0.5 }}>{signal.type} @ {signal.entry_price}</div>
+                            <tr key={signal.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                <td style={{ padding: '1rem 0.8rem' }}>
+                                    <div style={{ fontWeight: 600, color: '#fff' }}>{signal.pair}</div>
+                                    <div style={{ fontSize: '0.65rem', opacity: 0.5, letterSpacing: '1px' }}>{signal.type} @ {signal.entry_price}</div>
                                 </td>
-                                <td style={{ padding: '0.75rem 0.5rem' }}>
+                                <td style={{ padding: '1rem 0.8rem' }}>
                                     <span style={{
-                                        color: signal.status === 'ACTIVE' ? 'var(--neon-green)' : '#999',
-                                        fontSize: '0.75rem',
-                                        textTransform: 'uppercase'
+                                        color: signal.status === 'ACTIVE' ? 'var(--vw-cyan)' : 'var(--text-dim)',
+                                        fontSize: '0.7rem',
+                                        textTransform: 'uppercase',
+                                        fontWeight: 900,
+                                        letterSpacing: '1px'
                                     }}>
                                         {signal.status}
                                     </span>
                                 </td>
-                                <td style={{ padding: '0.75rem 0.5rem' }}>
+                                <td style={{ padding: '1rem 0.8rem' }}>
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                         {signal.status === 'ACTIVE' && (
                                             <button
                                                 onClick={() => updateStatus(signal.id, 'CLOSED')}
-                                                style={actionButtonStyle('#39ff14')}
+                                                style={actionButtonStyle('var(--vw-cyan)')}
                                             >
                                                 CLOSE
                                             </button>
                                         )}
                                         <button
                                             onClick={() => deleteSignal(signal.id)}
-                                            style={actionButtonStyle('#ff4d4d')}
+                                            style={actionButtonStyle('var(--vw-magenta)')}
                                         >
                                             DEL
                                         </button>
@@ -127,26 +129,37 @@ export default function SignalManagement() {
                     </tbody>
                 </table>
                 {signals.length === 0 && (
-                    <div style={{ padding: '2rem', textAlign: 'center', opacity: 0.3 }}>
-                        NO SIGNALS LOGGED
+                    <div style={{ padding: '4rem', textAlign: 'center', opacity: 0.3, fontStyle: 'italic' }}>
+                        NO SIGNALS DETECTED IN THIS SECTOR
                     </div>
                 )}
             </div>
 
             <button
                 onClick={fetchSignals}
+                className="vapor-sub-btn"
                 style={{
-                    background: 'transparent',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    color: 'rgba(255,255,255,0.5)',
-                    padding: '0.5rem',
-                    fontSize: '0.7rem',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'rgba(255,255,255,0.7)',
+                    padding: '0.6rem 1.2rem',
+                    fontSize: '0.65rem',
                     cursor: 'pointer',
-                    alignSelf: 'flex-start'
+                    alignSelf: 'flex-start',
+                    borderRadius: '100px',
+                    letterSpacing: '2px',
+                    transition: 'all 0.3s ease'
                 }}
             >
-                REFRESH SIGNALS
+                REFRESH FEED
             </button>
+            <style jsx>{`
+                .vapor-sub-btn:hover {
+                    background: rgba(1, 205, 254, 0.1);
+                    border-color: var(--vw-cyan);
+                    color: #fff;
+                }
+            `}</style>
         </div>
     );
 }
@@ -155,9 +168,11 @@ const actionButtonStyle = (color: string) => ({
     background: 'transparent',
     border: `1px solid ${color}`,
     color: color,
-    padding: '0.2rem 0.5rem',
-    fontSize: '0.7rem',
+    padding: '0.3rem 0.6rem',
+    fontSize: '0.65rem',
     cursor: 'pointer',
-    borderRadius: '4px',
-    transition: 'all 0.2s ease'
+    borderRadius: '100px',
+    fontWeight: 700,
+    letterSpacing: '1px',
+    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
 });
