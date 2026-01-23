@@ -6,6 +6,8 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { PublicKey, LAMPORTS_PER_SOL, Transaction, SystemProgram } from '@solana/web3.js';
 import { SolanaProvider } from '@/components/SolanaProvider';
 import { getTokenMetadata, getSolPrice, getMultiTokenPrices, getTrendingTokens, MobulaTokenData } from '@/lib/mobula';
+import { getQuote, createSwapTransaction } from '@/lib/jupiter';
+import { VersionedTransaction } from '@solana/web3.js';
 
 // Removed problematic dynamic import
 
@@ -231,20 +233,43 @@ function BotInterface() {
             const action = type === 'SNIPE' ? 'SNIPING' : `${type}ing`;
             setStatus(`Initiating ${action} order for ${newTrade.asset}...`);
 
-            const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('finalized');
+            // Jupiter Swap Logic
+            const inputMint = (type === 'BUY' || type === 'SNIPE') ? 'So11111111111111111111111111111111111111112' : (contractAddress || 'So11111111111111111111111111111111111111112');
+            const outputMint = (type === 'BUY' || type === 'SNIPE') ? (contractAddress || 'So11111111111111111111111111111111111111112') : 'So11111111111111111111111111111111111111112';
 
-            const transaction = new Transaction({
-                feePayer: publicKey,
-                recentBlockhash: blockhash,
-            }).add(
-                SystemProgram.transfer({
-                    fromPubkey: publicKey,
-                    toPubkey: publicKey,
-                    lamports: 1000, // Self-transfer as dummy trade
-                })
-            );
+            // Amount in lamports/units (assuming 9 decimals for SOL, need improvements for other tokens if sell)
+            // For simplicity, we are handling SOL amount mostly. If selling a token, we need its decimals.
+            // Usually input `amount` is in UI terms (SOL or Tokens). 
+            // Let's implement BUY/SNIPE (SOL -> Token) flow robustly first.
+            const amountInLamports = Math.floor(parseFloat(amount) * LAMPORTS_PER_SOL);
+
+            if (type === 'SELL' && (!tokenInfo || !balance)) { // Simple check, real implementation needs token account balance
+                throw new Error('Sell not fully simulated without token balance check');
+            }
+
+            // Get Quote
+            const quote = await getQuote({
+                inputMint,
+                outputMint,
+                amount: amountInLamports,
+                slippageBps: parseFloat(slippage) * 100
+            });
+
+            if (!quote) throw new Error('No quote found');
+
+            // Create Swap Transaction
+            const swapResult = await createSwapTransaction(quote, publicKey.toString());
+
+            if (!swapResult || !swapResult.swapTransaction) throw new Error('Failed to create swap transaction');
+
+            // Deserialize and Sign
+            const swapTransactionBuf = Buffer.from(swapResult.swapTransaction, 'base64');
+            const transaction = VersionedTransaction.deserialize(swapTransactionBuf);
 
             const signature = await sendTransaction(transaction, connection);
+
+            // Confirm
+            const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
             await connection.confirmTransaction({
                 signature,
                 blockhash,
@@ -262,7 +287,7 @@ function BotInterface() {
                 t.id === tradeId ? { ...t, status: 'FAILED' } : t
             ));
             const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-            setStatus(`Error: ${errorMessage}`);
+            setStatus(`Error: ${errorMessage} (Ensure Balance/RPC)`);
         }
     };
 
