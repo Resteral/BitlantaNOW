@@ -1,10 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import CreateSignalForm from '@/components/CreateSignalForm';
-import TradingBot from '@/components/TradingBot';
 import UserManagement from '@/components/UserManagement';
 import SignalManagement from '@/components/SignalManagement';
 
@@ -97,26 +97,48 @@ export default function DashboardPage() {
                         ENCRYPTED UPLINK ESTABLISHED
                     </div>
                 </div>
-                <button
-                    onClick={handleLogout}
-                    className="vapor-logout-btn"
-                    style={{
-                        background: 'rgba(255, 113, 206, 0.05)',
-                        border: '1px solid rgba(255, 113, 206, 0.3)',
-                        color: 'var(--vw-magenta)',
-                        padding: '0.6rem 2rem',
-                        cursor: 'pointer',
-                        fontFamily: 'inherit',
-                        textTransform: 'uppercase',
-                        fontSize: '0.7rem',
-                        fontWeight: 900,
-                        borderRadius: '100px',
-                        letterSpacing: '2px',
-                        transition: 'all 0.3s ease'
-                    }}
-                >
-                    Shutdown
-                </button>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <Link
+                        href="/bot"
+                        style={{
+                            background: 'rgba(1, 205, 254, 0.05)',
+                            border: '1px solid rgba(1, 205, 254, 0.3)',
+                            color: 'var(--vw-cyan)',
+                            padding: '0.6rem 2rem',
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            textTransform: 'uppercase',
+                            fontSize: '0.7rem',
+                            fontWeight: 900,
+                            borderRadius: '100px',
+                            letterSpacing: '2px',
+                            transition: 'all 0.3s ease',
+                            textDecoration: 'none'
+                        }}
+                    >
+                        Bot Terminal
+                    </Link>
+                    <button
+                        onClick={handleLogout}
+                        className="vapor-logout-btn"
+                        style={{
+                            background: 'rgba(255, 113, 206, 0.05)',
+                            border: '1px solid rgba(255, 113, 206, 0.3)',
+                            color: 'var(--vw-magenta)',
+                            padding: '0.6rem 2rem',
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            textTransform: 'uppercase',
+                            fontSize: '0.7rem',
+                            fontWeight: 900,
+                            borderRadius: '100px',
+                            letterSpacing: '2px',
+                            transition: 'all 0.3s ease'
+                        }}
+                    >
+                        Shutdown
+                    </button>
+                </div>
             </header>
 
             <div style={{
@@ -147,9 +169,34 @@ export default function DashboardPage() {
                     <UserManagement />
                 </div>
 
-                {/* Panel 4: Bot Status */}
-                <div style={{ ...panelStyle, background: 'transparent', border: 'none', boxShadow: 'none', padding: 0 }}>
-                    <TradingBot />
+                {/* Panel 4: Bot Access */}
+                <div style={{ ...panelStyle, background: 'rgba(1, 205, 254, 0.05)', borderColor: 'rgba(1, 205, 254, 0.2)' }}>
+                    <h2 style={panelTitleStyle}>Terminal Uplink</h2>
+                    <p style={panelDescStyle}>Direct access to the secure trading execution environment.</p>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+                        <Link
+                            href="/bot"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.8rem',
+                                background: 'var(--vw-cyan)',
+                                color: '#000',
+                                padding: '1rem 2.5rem',
+                                borderRadius: '100px',
+                                textDecoration: 'none',
+                                fontWeight: 900,
+                                letterSpacing: '2px',
+                                textTransform: 'uppercase',
+                                fontSize: '0.8rem',
+                                boxShadow: '0 0 30px rgba(1, 205, 254, 0.4)',
+                                transition: 'all 0.3s ease'
+                            }}
+                            className="bot-access-btn"
+                        >
+                            Open Bot Terminal
+                        </Link>
+                    </div>
                 </div>
             </div>
 
