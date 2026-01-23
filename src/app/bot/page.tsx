@@ -16,6 +16,7 @@ function BotInterfaceInternal() {
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
     const [balance, setBalance] = useState<number | null>(null);
+    const [solPrice] = useState(245.82); // Simulated live price
     const [amount, setAmount] = useState('0.1');
     const [status, setStatus] = useState<string | null>(null);
 
@@ -26,6 +27,9 @@ function BotInterfaceInternal() {
     const [slippage, setSlippage] = useState('15');
     const [priorityFee, setPriorityFee] = useState('0.001');
     const [tokenInfo, setTokenInfo] = useState<{ name: string; symbol: string; price: string } | null>(null);
+
+    // Trade History / Ledger
+    const [trades, setTrades] = useState<any[]>([]);
 
     useEffect(() => {
         if (!publicKey) return;
@@ -70,6 +74,19 @@ function BotInterfaceInternal() {
             return;
         }
 
+        const tradeId = Math.random().toString(36).substring(7);
+        const newTrade = {
+            id: tradeId,
+            time: new Date().toLocaleTimeString(),
+            type,
+            asset: snipeMode && tokenInfo ? tokenInfo.symbol : 'SOL',
+            amount: amount,
+            status: 'PROCESSING',
+            sig: null
+        };
+
+        setTrades(prev => [newTrade, ...prev]);
+
         try {
             const action = type === 'SNIPE' ? 'SNIPING' : `${type}ing`;
             setStatus(`Initiating ${action} order...`);
@@ -86,12 +103,21 @@ function BotInterfaceInternal() {
             const signature = await sendTransaction(transaction, connection);
             await connection.confirmTransaction(signature, 'processed');
 
+            setTrades(prev => prev.map(t =>
+                t.id === tradeId ? { ...t, status: 'CONFIRMED', sig: signature } : t
+            ));
+
             setStatus(`${type} successful! Slippage: ${slippage}%, Fee: ${priorityFee} SOL. Sig: ${signature.slice(0, 8)}...`);
         } catch (err: any) {
             console.error(err);
+            setTrades(prev => prev.map(t =>
+                t.id === tradeId ? { ...t, status: 'FAILED' } : t
+            ));
             setStatus(`Error: ${err.message}`);
         }
     };
+
+    const usdBalance = balance ? (balance * solPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
 
     return (
         <div style={{
@@ -174,6 +200,25 @@ function BotInterfaceInternal() {
                 gap: '1rem'
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {/* Portfolio Summary Section */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                        <div style={statBox}>
+                            <label style={statLabel}>WALLET_BALANCE</label>
+                            <span style={statValue}>{balance !== null ? balance.toFixed(4) : '0.0000'} SOL</span>
+                            <span style={{ fontSize: '0.7rem', color: '#2ebd85' }}>≈ ${usdBalance} USD</span>
+                        </div>
+                        <div style={statBox}>
+                            <label style={statLabel}>POSITION_VALUE</label>
+                            <span style={statValue}>$0.00</span>
+                            <span style={{ fontSize: '0.7rem', color: '#848e9c' }}>0 ACTIVE_BETS</span>
+                        </div>
+                        <div style={statBox}>
+                            <label style={statLabel}>SESSION_PnL</label>
+                            <span style={{ ...statValue, color: '#848e9c' }}>+$0.00</span>
+                            <span style={{ fontSize: '0.7rem', color: '#848e9c' }}>0.00%</span>
+                        </div>
+                    </div>
+
                     {/* Viewport: Chart or Token Scanner */}
                     <div style={{
                         flex: 1,
@@ -196,19 +241,19 @@ function BotInterfaceInternal() {
                                     </div>
                                 </div>
                                 <div style={{ marginTop: 'auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
-                                    <div style={statBox}>
+                                    <div style={{ ...statBox, background: '#121619', border: '1px solid #2b2f36' }}>
                                         <label style={statLabel}>LIQUIDITY</label>
                                         <span style={statValue}>$142,500</span>
                                     </div>
-                                    <div style={statBox}>
+                                    <div style={{ ...statBox, background: '#121619', border: '1px solid #2b2f36' }}>
                                         <label style={statLabel}>BURNED</label>
                                         <span style={{ ...statValue, color: '#2ebd85' }}>100%</span>
                                     </div>
-                                    <div style={statBox}>
+                                    <div style={{ ...statBox, background: '#121619', border: '1px solid #2b2f36' }}>
                                         <label style={statLabel}>MINT</label>
                                         <span style={{ ...statValue, color: '#f6465d' }}>RENNOUNCED</span>
                                     </div>
-                                    <div style={statBox}>
+                                    <div style={{ ...statBox, background: '#121619', border: '1px solid #2b2f36' }}>
                                         <label style={statLabel}>MARKET CAP</label>
                                         <span style={statValue}>$4.2M</span>
                                     </div>
@@ -222,23 +267,62 @@ function BotInterfaceInternal() {
                         )}
                     </div>
 
+                    {/* Trade Ledger / Transaction History */}
                     <div style={{
-                        height: '200px',
+                        height: '250px',
                         background: '#121619',
                         borderRadius: '8px',
                         border: '1px solid #2b2f36',
-                        padding: '1rem',
-                        overflowY: 'auto'
+                        display: 'flex',
+                        flexDirection: 'column'
                     }}>
-                        <h3 style={{ fontSize: '0.8rem', marginBottom: '1rem', opacity: 0.6, letterSpacing: '2px' }}>EXECUTION_LOG</h3>
-                        <div style={{ fontSize: '0.75rem', fontFamily: 'monospace' }}>
-                            {status && (
-                                <div style={{ color: '#f0b90b', marginBottom: '0.5rem', borderLeft: '2px solid #f0b90b', paddingLeft: '8px' }}>
-                                    {`[${new Date().toLocaleTimeString()}] ${status}`}
-                                </div>
-                            )}
-                            <div style={{ opacity: 0.2 }}>Initializing neural link... established.</div>
-                            <div style={{ opacity: 0.2 }}>Waiting for user heartbeat...</div>
+                        <div style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ fontSize: '0.8rem', margin: 0, opacity: 0.6, letterSpacing: '2px' }}>TRADE_LEDGER</h3>
+                            <span style={{ fontSize: '0.65rem', color: '#848e9c' }}>{trades.length} TRANSACTIONS</span>
+                        </div>
+                        <div style={{ flex: 1, overflowY: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.75rem', textAlign: 'left' }}>
+                                <thead style={{ position: 'sticky', top: 0, background: '#121619', color: '#848e9c' }}>
+                                    <tr>
+                                        <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>TIME</th>
+                                        <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>TYPE</th>
+                                        <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>ASSET</th>
+                                        <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>AMOUNT</th>
+                                        <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>STATUS</th>
+                                        <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>TX_LINK</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {trades.map((trade) => (
+                                        <tr key={trade.id} style={{ borderBottom: '1px solid #1e2329' }}>
+                                            <td style={{ padding: '0.8rem 1rem' }}>{trade.time}</td>
+                                            <td style={{ padding: '0.8rem 1rem' }}>
+                                                <span style={{ color: trade.type === 'SELL' ? '#f6465d' : '#2ebd85', fontWeight: 700 }}>{trade.type}</span>
+                                            </td>
+                                            <td style={{ padding: '0.8rem 1rem' }}>{trade.asset}</td>
+                                            <td style={{ padding: '0.8rem 1rem' }}>{trade.amount} SOL</td>
+                                            <td style={{ padding: '0.8rem 1rem' }}>
+                                                <span style={{
+                                                    padding: '2px 6px',
+                                                    borderRadius: '2px',
+                                                    background: trade.status === 'CONFIRMED' ? 'rgba(46, 189, 133, 0.1)' : 'rgba(240, 185, 11, 0.1)',
+                                                    color: trade.status === 'CONFIRMED' ? '#2ebd85' : '#f0b90b'
+                                                }}>{trade.status}</span>
+                                            </td>
+                                            <td style={{ padding: '0.8rem 1rem' }}>
+                                                {trade.sig ? (
+                                                    <a href={`https://solscan.io/tx/${trade.sig}`} target="_blank" style={{ color: '#01cdfe', textDecoration: 'none' }}>BLOCK</a>
+                                                ) : '---'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {trades.length === 0 && (
+                                        <tr>
+                                            <td colSpan={6} style={{ padding: '4rem', textAlign: 'center', opacity: 0.2 }}>NO_TRANSACTIONS_IN_MEMORY</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -257,9 +341,11 @@ function BotInterfaceInternal() {
                         <h2 style={{ fontSize: '0.9rem', marginBottom: '0.5rem', color: '#fff', letterSpacing: '1px' }}>
                             {snipeMode ? 'SNIPE_CONFIG' : 'TRADE_CONFIG'}
                         </h2>
-                        <div style={{ fontSize: '0.75rem', color: '#848e9c' }}>
-                            WALLET: {balance !== null ? `${balance.toFixed(4)} SOL` : 'NOT_CONNECTED'}
-                        </div>
+                        {status && (
+                            <div style={{ fontSize: '0.65rem', color: '#f0b90b', fontFamily: 'monospace' }}>
+                                &gt; {status}
+                            </div>
+                        )}
                     </div>
 
                     {snipeMode && (
