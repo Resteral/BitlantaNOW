@@ -42,3 +42,24 @@ export async function getSolPrice(): Promise<number> {
         return 245.82;
     }
 }
+export async function getMultiTokenPrices(addresses: string[]): Promise<Record<string, number>> {
+    if (addresses.length === 0) return {};
+    try {
+        // Mobula multi-data endpoint: market/multi-data?assets=address1,address2
+        const response = await fetch(`${MOBULA_API_BASE}/market/multi-data?assets=${addresses.join(',')}`);
+        if (!response.ok) return {};
+
+        const { data } = await response.json();
+        const prices: Record<string, number> = {};
+
+        // Map response data to address -> price
+        Object.keys(data).forEach(addr => {
+            prices[addr] = data[addr].price || 0;
+        });
+
+        return prices;
+    } catch (error) {
+        console.error('Mobula Multi-Price Error:', error);
+        return {};
+    }
+}

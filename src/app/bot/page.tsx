@@ -5,7 +5,7 @@ import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { PublicKey, LAMPORTS_PER_SOL, Transaction, SystemProgram } from '@solana/web3.js';
 import { SolanaProvider } from '@/components/SolanaProvider';
-import { getTokenMetadata, getSolPrice, MobulaTokenData } from '@/lib/mobula';
+import { getTokenMetadata, getSolPrice, getMultiTokenPrices, MobulaTokenData } from '@/lib/mobula';
 
 import dynamic from 'next/dynamic';
 
@@ -87,17 +87,46 @@ function BotInterfaceInternal() {
         }
     }, [contractAddress, autoSnipe, snipeMode]);
 
-    // Auto-Sell Monitoring (Mocked monitoring of active positions)
+    // Auto-PnL Monitoring
+    useEffect(() => {
+        const monitorPnL = async () => {
+            const addresses = trades
+                .filter(t => t.status === 'CONFIRMED' && t.asset !== 'SOL')
+                .map(t => contractAddress); // Simplification: assuming current CA for simplicity in this demo, or we'd store CA per trade
+
+            // Realistically we'd need to store the CA with the trade object
+            // For now, let's update SOL price and any active trades
+            const prices = await getMultiTokenPrices(addresses);
+
+            setTrades(prev => prev.map(trade => {
+                if (trade.status !== 'CONFIRMED') return trade;
+
+                const currentPrice = trade.asset === 'SOL' ? solPrice : (prices[contractAddress] || trade.currentPrice);
+                const pnlPercent = ((currentPrice - trade.entryPrice) / trade.entryPrice) * 100;
+                const pnlUsd = (pnlPercent / 100) * (parseFloat(trade.amount) * (trade.asset === 'SOL' ? solPrice : trade.entryPrice));
+
+                return {
+                    ...trade,
+                    currentPrice,
+                    pnlPercent,
+                    pnlUsd
+                };
+            }));
+        };
+
+        const interval = setInterval(monitorPnL, 10000); // 10s PnL refresh
+        return () => clearInterval(interval);
+    }, [trades, solPrice, contractAddress]);
+
+    // Auto-Sell Monitoring
     useEffect(() => {
         if (!autoSell) return;
 
         const monitor = setInterval(() => {
             trades.forEach(trade => {
                 if (trade.status === 'CONFIRMED' && trade.type === 'BUY') {
-                    // Logic would fetch current price of trade.asset and compare
-                    const chance = Math.random();
-                    if (chance > 0.98) {
-                        setStatus(`AUTO_SELL: Target Hit for ${trade.asset}!`);
+                    if (trade.pnlPercent >= parseFloat(takeProfit) || trade.pnlPercent <= -parseFloat(stopLoss)) {
+                        setStatus(`AUTO_SELL: Target Hit for ${trade.asset}! PnL: ${trade.pnlPercent.toFixed(2)}%`);
                         handleTrade('SELL');
                     }
                 }
@@ -105,7 +134,7 @@ function BotInterfaceInternal() {
         }, 5000);
 
         return () => clearInterval(monitor);
-    }, [autoSell, trades]);
+    }, [autoSell, trades, takeProfit, stopLoss]);
 
     const handleTrade = async (type: 'BUY' | 'SELL' | 'SNIPE') => {
         if (!publicKey) {
@@ -114,12 +143,20 @@ function BotInterfaceInternal() {
         }
 
         const tradeId = Math.random().toString(36).substring(7);
+        const currentTokenPrice = tokenInfo ? tokenInfo.price : solPrice;
+
         const newTrade = {
             id: tradeId,
             time: new Date().toLocaleTimeString(),
             type,
             asset: snipeMode && tokenInfo ? tokenInfo.symbol : 'SOL',
+            assetName: snipeMode && tokenInfo ? tokenInfo.name : 'Solana',
+            logo: snipeMode && tokenInfo ? tokenInfo.logo : null,
             amount: amount,
+            entryPrice: currentTokenPrice,
+            currentPrice: currentTokenPrice,
+            pnlPercent: 0,
+            pnlUsd: 0,
             status: 'PROCESSING',
             sig: null
         };
@@ -128,9 +165,8 @@ function BotInterfaceInternal() {
 
         try {
             const action = type === 'SNIPE' ? 'SNIPING' : `${type}ing`;
-            setStatus(`Initiating ${action} order...`);
+            setStatus(`Initiating ${action} order for ${newTrade.asset}...`);
 
-            // Transaction simulation
             const transaction = new Transaction().add(
                 SystemProgram.transfer({
                     fromPubkey: publicKey,
@@ -146,7 +182,7 @@ function BotInterfaceInternal() {
                 t.id === tradeId ? { ...t, status: 'CONFIRMED', sig: signature } : t
             ));
 
-            setStatus(`${type} successful! Slippage: ${slippage}%, Fee: ${priorityFee} SOL. Sig: ${signature.slice(0, 8)}...`);
+            setStatus(`${type} successful! [${newTrade.asset}] @ $${currentTokenPrice.toFixed(4)}. Sig: ${signature.slice(0, 8)}...`);
         } catch (err: any) {
             console.error(err);
             setTrades(prev => prev.map(t =>
@@ -327,40 +363,58 @@ function BotInterfaceInternal() {
                                 <thead style={{ position: 'sticky', top: 0, background: '#121619', color: '#848e9c' }}>
                                     <tr>
                                         <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>TIME</th>
-                                        <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>TYPE</th>
                                         <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>ASSET</th>
+                                        <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>ENTRY</th>
                                         <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>AMOUNT</th>
+                                        <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>PnL</th>
                                         <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>STATUS</th>
-                                        <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>TX_LINK</th>
+                                        <th style={{ padding: '0.8rem 1rem', borderBottom: '1px solid #2b2f36' }}>TX</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {trades.map((trade) => (
                                         <tr key={trade.id} style={{ borderBottom: '1px solid #1e2329' }}>
-                                            <td style={{ padding: '0.8rem 1rem' }}>{trade.time}</td>
+                                            <td style={{ padding: '0.8rem 1rem', opacity: 0.5 }}>{trade.time}</td>
                                             <td style={{ padding: '0.8rem 1rem' }}>
-                                                <span style={{ color: trade.type === 'SELL' ? '#f6465d' : '#2ebd85', fontWeight: 700 }}>{trade.type}</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    {trade.logo && <img src={trade.logo} style={{ width: '16px', height: '16px', borderRadius: '50%' }} alt="" />}
+                                                    <div>
+                                                        <div style={{ fontWeight: 700, color: trade.type === 'SELL' ? '#f6465d' : '#2ebd85' }}>
+                                                            {trade.type} {trade.asset}
+                                                        </div>
+                                                        <div style={{ fontSize: '0.6rem', opacity: 0.5 }}>{trade.assetName}</div>
+                                                    </div>
+                                                </div>
                                             </td>
-                                            <td style={{ padding: '0.8rem 1rem' }}>{trade.asset}</td>
+                                            <td style={{ padding: '0.8rem 1rem' }}>${trade.entryPrice?.toFixed(4) || '---'}</td>
                                             <td style={{ padding: '0.8rem 1rem' }}>{trade.amount} SOL</td>
+                                            <td style={{ padding: '0.8rem 1rem' }}>
+                                                <div style={{ color: trade.pnlPercent >= 0 ? '#2ebd85' : '#f6465d', fontWeight: 700 }}>
+                                                    {trade.pnlPercent >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
+                                                </div>
+                                                <div style={{ fontSize: '0.6rem', opacity: 0.5 }}>
+                                                    {trade.pnlUsd >= 0 ? '+' : ''}${trade.pnlUsd.toFixed(2)}
+                                                </div>
+                                            </td>
                                             <td style={{ padding: '0.8rem 1rem' }}>
                                                 <span style={{
                                                     padding: '2px 6px',
                                                     borderRadius: '2px',
+                                                    fontSize: '0.6rem',
                                                     background: trade.status === 'CONFIRMED' ? 'rgba(46, 189, 133, 0.1)' : 'rgba(240, 185, 11, 0.1)',
                                                     color: trade.status === 'CONFIRMED' ? '#2ebd85' : '#f0b90b'
                                                 }}>{trade.status}</span>
                                             </td>
                                             <td style={{ padding: '0.8rem 1rem' }}>
                                                 {trade.sig ? (
-                                                    <a href={`https://solscan.io/tx/${trade.sig}`} target="_blank" style={{ color: '#01cdfe', textDecoration: 'none' }}>BLOCK</a>
+                                                    <a href={`https://solscan.io/tx/${trade.sig}`} target="_blank" style={{ color: '#01cdfe', textDecoration: 'none' }}>EXE</a>
                                                 ) : '---'}
                                             </td>
                                         </tr>
                                     ))}
                                     {trades.length === 0 && (
                                         <tr>
-                                            <td colSpan={6} style={{ padding: '4rem', textAlign: 'center', opacity: 0.2 }}>NO_TRANSACTIONS_IN_MEMORY</td>
+                                            <td colSpan={7} style={{ padding: '4rem', textAlign: 'center', opacity: 0.2 }}>NO_TRANSACTIONS_IN_MEMORY</td>
                                         </tr>
                                     )}
                                 </tbody>
