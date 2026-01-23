@@ -9,11 +9,28 @@ import { getTokenMetadata, getSolPrice, getMultiTokenPrices, MobulaTokenData } f
 
 import dynamic from 'next/dynamic';
 
-const BotInterface = dynamic(() => Promise.resolve(BotInterfaceInternal), {
-    ssr: false,
-});
 
-function BotInterfaceInternal() {
+// Removed problematic dynamic import
+
+interface Trade {
+    id: string;
+    time: string;
+    type: 'BUY' | 'SELL' | 'SNIPE';
+    ca: string;
+    asset: string;
+    assetName: string;
+    logo: string | null;
+    amount: string;
+    entryPrice: number;
+    currentPrice: number;
+    pnlPercent: number;
+    pnlUsd: number;
+    status: 'PROCESSING' | 'CONFIRMED' | 'FAILED';
+    sig: string | null;
+}
+
+
+function BotInterface() {
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
     const [balance, setBalance] = useState<number | null>(null);
@@ -35,15 +52,22 @@ function BotInterfaceInternal() {
     const [autoSell, setAutoSell] = useState(false);
 
     // Trade History / Ledger
-    const [trades, setTrades] = useState<any[]>([]);
+    const [trades, setTrades] = useState<Trade[]>([]);
 
     useEffect(() => {
         if (!publicKey) return;
 
         const getBalance = async () => {
-            const info = await connection.getAccountInfo(publicKey);
-            if (info) {
-                setBalance(info.lamports / LAMPORTS_PER_SOL);
+            try {
+                const info = await connection.getAccountInfo(publicKey);
+                if (info) {
+                    setBalance(info.lamports / LAMPORTS_PER_SOL);
+                } else {
+                    setBalance(0); // Account exists (on curve) but has no data/SOL, or new account
+                }
+            } catch (error) {
+                console.error('Failed to fetch balance:', error);
+                setBalance(0);
             }
             const price = await getSolPrice();
             setSolPrice(price);
@@ -90,33 +114,36 @@ function BotInterfaceInternal() {
     // Auto-PnL Monitoring
     useEffect(() => {
         const monitorPnL = async () => {
-            const addresses = trades
-                .filter(t => t.status === 'CONFIRMED' && t.asset !== 'SOL')
-                .map(t => contractAddress); // Simplification: assuming current CA for simplicity in this demo, or we'd store CA per trade
+            const activeTrades = trades.filter(t => t.status === 'CONFIRMED');
+            if (activeTrades.length === 0) return;
 
-            // Realistically we'd need to store the CA with the trade object
-            // For now, let's update SOL price and any active trades
-            const prices = await getMultiTokenPrices(addresses);
+            const nonSolAddresses = Array.from(new Set(
+                activeTrades
+                    .filter(t => t.asset !== 'SOL' && t.ca)
+                    .map(t => t.ca)
+            ));
+
+            const prices = await getMultiTokenPrices(nonSolAddresses as string[]);
 
             setTrades(prev => prev.map(trade => {
                 if (trade.status !== 'CONFIRMED') return trade;
 
-                const currentPrice = trade.asset === 'SOL' ? solPrice : (prices[contractAddress] || trade.currentPrice);
+                const currentPrice = trade.asset === 'SOL' ? solPrice : (prices[trade.ca] || trade.currentPrice);
                 const pnlPercent = ((currentPrice - trade.entryPrice) / trade.entryPrice) * 100;
                 const pnlUsd = (pnlPercent / 100) * (parseFloat(trade.amount) * (trade.asset === 'SOL' ? solPrice : trade.entryPrice));
 
                 return {
                     ...trade,
                     currentPrice,
-                    pnlPercent,
-                    pnlUsd
+                    pnlPercent: isNaN(pnlPercent) ? 0 : pnlPercent,
+                    pnlUsd: isNaN(pnlUsd) ? 0 : pnlUsd
                 };
             }));
         };
 
         const interval = setInterval(monitorPnL, 10000); // 10s PnL refresh
         return () => clearInterval(interval);
-    }, [trades, solPrice, contractAddress]);
+    }, [trades, solPrice]);
 
     // Auto-Sell Monitoring
     useEffect(() => {
@@ -145,13 +172,14 @@ function BotInterfaceInternal() {
         const tradeId = Math.random().toString(36).substring(7);
         const currentTokenPrice = tokenInfo ? tokenInfo.price : solPrice;
 
-        const newTrade = {
+        const newTrade: Trade = {
             id: tradeId,
             time: new Date().toLocaleTimeString(),
             type,
+            ca: snipeMode ? contractAddress : 'SOL',
             asset: snipeMode && tokenInfo ? tokenInfo.symbol : 'SOL',
             assetName: snipeMode && tokenInfo ? tokenInfo.name : 'Solana',
-            logo: snipeMode && tokenInfo ? tokenInfo.logo : null,
+            logo: (snipeMode && tokenInfo ? tokenInfo.logo : null) || null,
             amount: amount,
             entryPrice: currentTokenPrice,
             currentPrice: currentTokenPrice,
@@ -167,28 +195,38 @@ function BotInterfaceInternal() {
             const action = type === 'SNIPE' ? 'SNIPING' : `${type}ing`;
             setStatus(`Initiating ${action} order for ${newTrade.asset}...`);
 
-            const transaction = new Transaction().add(
+            const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('finalized');
+
+            const transaction = new Transaction({
+                feePayer: publicKey,
+                recentBlockhash: blockhash,
+            }).add(
                 SystemProgram.transfer({
                     fromPubkey: publicKey,
                     toPubkey: publicKey,
-                    lamports: 1000,
+                    lamports: 1000, // Self-transfer as dummy trade
                 })
             );
 
             const signature = await sendTransaction(transaction, connection);
-            await connection.confirmTransaction(signature, 'processed');
+            await connection.confirmTransaction({
+                signature,
+                blockhash,
+                lastValidBlockHeight
+            }, 'confirmed');
 
             setTrades(prev => prev.map(t =>
                 t.id === tradeId ? { ...t, status: 'CONFIRMED', sig: signature } : t
             ));
 
             setStatus(`${type} successful! [${newTrade.asset}] @ $${currentTokenPrice.toFixed(4)}. Sig: ${signature.slice(0, 8)}...`);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
             setTrades(prev => prev.map(t =>
                 t.id === tradeId ? { ...t, status: 'FAILED' } : t
             ));
-            setStatus(`Error: ${err.message}`);
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+            setStatus(`Error: ${errorMessage}`);
         }
     };
 
@@ -545,7 +583,7 @@ const statBox = {
     padding: '1rem',
     borderRadius: '4px',
     display: 'flex',
-    flexDirection: 'column' as 'column',
+    flexDirection: 'column' as const,
     gap: '4px'
 };
 

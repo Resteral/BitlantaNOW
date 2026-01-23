@@ -206,7 +206,7 @@ const typeButtonStyle = {
     border: '1px solid',
     cursor: 'pointer',
     fontFamily: 'inherit',
-    fontWeight: '900' as '900',
+    fontWeight: '900' as const,
     borderRadius: '100px',
     letterSpacing: '2px',
     fontSize: '0.7rem',

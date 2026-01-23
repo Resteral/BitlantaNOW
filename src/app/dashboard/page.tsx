@@ -231,7 +231,7 @@ const panelStyle = {
     border: '1px solid rgba(255, 255, 255, 0.05)',
     boxShadow: '0 20px 50px rgba(0, 0, 0, 0.3)',
     display: 'flex',
-    flexDirection: 'column' as 'column',
+    flexDirection: 'column' as const,
     transition: 'transform 0.3s ease'
 };
 
@@ -241,7 +241,7 @@ const panelTitleStyle = {
     fontSize: '1.4rem',
     fontWeight: 300,
     letterSpacing: '4px',
-    textTransform: 'uppercase' as 'uppercase',
+    textTransform: 'uppercase' as const,
     color: '#fff',
     fontStyle: 'italic'
 };

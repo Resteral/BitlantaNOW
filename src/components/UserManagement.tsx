@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface UserTier {
@@ -14,7 +14,7 @@ export default function UserManagement() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         setLoading(true);
         const { data, error } = await supabase
             .from('user_tiers')
@@ -27,11 +27,11 @@ export default function UserManagement() {
             setUsers(data || []);
         }
         setLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [fetchUsers]);
 
     const updateTier = async (userId: string, newTier: string) => {
         const { error } = await supabase

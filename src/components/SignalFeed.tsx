@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import SignalCard from './SignalCard';
 
@@ -20,34 +20,34 @@ export default function SignalFeed() {
     const [userTier, setUserTier] = useState<string>('FREE');
     const [loading, setLoading] = useState(true);
 
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+
+        // Fetch User Tier if logged in
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data: tierData } = await supabase
+                .from('user_tiers')
+                .select('tier')
+                .eq('id', user.id)
+                .single();
+            if (tierData) setUserTier(tierData.tier);
+        }
+
+        // Fetch Signals
+        const { data, error } = await supabase
+            .from('signals')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        if (!error && data) {
+            setSignals(data as Signal[]);
+        }
+        setLoading(false);
+    }, []);
+
     useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-
-            // Fetch User Tier if logged in
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data: tierData } = await supabase
-                    .from('user_tiers')
-                    .select('tier')
-                    .eq('id', user.id)
-                    .single();
-                if (tierData) setUserTier(tierData.tier);
-            }
-
-            // Fetch Signals
-            const { data, error } = await supabase
-                .from('signals')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(10);
-
-            if (!error && data) {
-                setSignals(data as Signal[]);
-            }
-            setLoading(false);
-        };
-
         fetchData();
 
         // Optional: Subscribe to realtime changes
@@ -61,7 +61,7 @@ export default function SignalFeed() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, []);
+    }, [fetchData]);
 
     if (loading) return (
         <div style={{
