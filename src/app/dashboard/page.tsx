@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import CreateSignalForm from '@/components/CreateSignalForm';
+import TradingBot from '@/components/TradingBot';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -116,33 +117,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Panel 2: Bot Status */}
-                <div style={{
-                    border: '1px solid var(--foreground)',
-                    padding: '2rem',
-                    background: 'rgba(0, 0, 0, 0.3)',
-                    boxShadow: '0 0 15px rgba(0, 255, 255, 0.1)'
-                }}>
-                    <h2 style={{
-                        marginTop: 0,
-                        borderBottom: '1px solid var(--foreground)',
-                        paddingBottom: '0.5rem',
-                        marginBottom: '1rem',
-                        fontSize: '1.2rem',
-                        textTransform: 'uppercase'
-                    }}>
-                        Bot Status
-                    </h2>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
-                        <div style={{
-                            width: '10px',
-                            height: '10px',
-                            borderRadius: '50%',
-                            background: '#00ff00',
-                            boxShadow: '0 0 10px #00ff00'
-                        }} />
-                        <span>System Online</span>
-                    </div>
-                </div>
+                <TradingBot />
 
                 {/* Panel 3: User Management */}
                 <div style={{

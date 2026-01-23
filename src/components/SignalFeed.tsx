@@ -12,14 +12,30 @@ interface Signal {
     stop_loss?: number;
     created_at: string;
     status: 'ACTIVE' | 'CLOSED' | 'CANCELED';
+    tier: 'FREE' | 'BRONZE' | 'SILVER' | 'GOLD';
 }
 
 export default function SignalFeed() {
     const [signals, setSignals] = useState<Signal[]>([]);
+    const [userTier, setUserTier] = useState<string>('FREE');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchSignals = async () => {
+        const fetchData = async () => {
+            setLoading(true);
+
+            // Fetch User Tier if logged in
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: tierData } = await supabase
+                    .from('user_tiers')
+                    .select('tier')
+                    .eq('id', user.id)
+                    .single();
+                if (tierData) setUserTier(tierData.tier);
+            }
+
+            // Fetch Signals
             const { data, error } = await supabase
                 .from('signals')
                 .select('*')
@@ -32,7 +48,7 @@ export default function SignalFeed() {
             setLoading(false);
         };
 
-        fetchSignals();
+        fetchData();
 
         // Optional: Subscribe to realtime changes
         const channel = supabase
@@ -87,7 +103,7 @@ export default function SignalFeed() {
             padding: '1rem 0'
         }}>
             {signals.map(signal => (
-                <SignalCard key={signal.id} signal={signal} />
+                <SignalCard key={signal.id} signal={signal} userTier={userTier} />
             ))}
         </div>
     );

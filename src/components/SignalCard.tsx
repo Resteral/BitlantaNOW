@@ -9,9 +9,18 @@ interface Signal {
     stop_loss?: number;
     created_at: string;
     status: 'ACTIVE' | 'CLOSED' | 'CANCELED';
+    tier: 'FREE' | 'BRONZE' | 'SILVER' | 'GOLD';
 }
 
-export default function SignalCard({ signal }: { signal: Signal }) {
+const TIER_RANK = {
+    'FREE': 0,
+    'BRONZE': 1,
+    'SILVER': 2,
+    'GOLD': 3
+};
+
+export default function SignalCard({ signal, userTier = 'FREE' }: { signal: Signal; userTier?: string }) {
+    const isLocked = TIER_RANK[signal.tier as keyof typeof TIER_RANK] > TIER_RANK[userTier as keyof typeof TIER_RANK];
     const isLong = signal.type === 'LONG';
     const statusColor = isLong ? 'var(--neon-green)' : '#ff4d4d'; // Green for Long, Red for Short
     const glowColor = isLong ? 'var(--glow-green)' : 'rgba(255, 77, 77, 0.4)';
@@ -85,7 +94,10 @@ export default function SignalCard({ signal }: { signal: Signal }) {
                 gridTemplateColumns: '1fr 1fr',
                 gap: '1.5rem',
                 fontSize: '0.9rem',
-                zIndex: 1
+                zIndex: 1,
+                filter: isLocked ? 'blur(8px)' : 'none',
+                opacity: isLocked ? 0.3 : 1,
+                transition: 'all 0.3s ease'
             }}>
                 <div>
                     <span style={{ color: 'var(--text-dim)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Entry</span>
@@ -98,6 +110,40 @@ export default function SignalCard({ signal }: { signal: Signal }) {
                     </div>
                 </div>
             </div>
+
+            {/* Lock Overlay */}
+            {isLocked && (
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2,
+                    background: 'rgba(5, 2, 20, 0.4)',
+                    padding: '1rem'
+                }}>
+                    <div style={{
+                        fontSize: '2rem',
+                        marginBottom: '0.5rem',
+                        filter: 'drop-shadow(0 0 10px var(--neon-purple))'
+                    }}>🔒</div>
+                    <div style={{
+                        color: 'var(--neon-purple)',
+                        fontWeight: 800,
+                        fontSize: '0.8rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '2px',
+                        textAlign: 'center'
+                    }}>
+                        {signal.tier} ACCESS REQUIRED
+                    </div>
+                </div>
+            )}
 
             {/* Status Footer */}
             <div style={{

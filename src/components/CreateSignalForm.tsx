@@ -8,6 +8,7 @@ export default function CreateSignalForm() {
     const [entry, setEntry] = useState('');
     const [target, setTarget] = useState('');
     const [stopLoss, setStopLoss] = useState('');
+    const [tier, setTier] = useState<'FREE' | 'BRONZE' | 'SILVER' | 'GOLD'>('FREE');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
 
@@ -24,6 +25,7 @@ export default function CreateSignalForm() {
                     entry_price: parseFloat(entry),
                     target_price: target ? parseFloat(target) : null,
                     stop_loss: stopLoss ? parseFloat(stopLoss) : null,
+                    tier,
                     status: 'ACTIVE'
                 }
             ]);
@@ -120,6 +122,20 @@ export default function CreateSignalForm() {
                         style={inputStyle}
                     />
                 </div>
+            </div>
+
+            <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.8rem' }}>ACCESS TIER</label>
+                <select
+                    value={tier}
+                    onChange={(e) => setTier(e.target.value as any)}
+                    style={inputStyle}
+                >
+                    <option value="FREE">FREE (ALL USERS)</option>
+                    <option value="BRONZE">BRONZE</option>
+                    <option value="SILVER">SILVER</option>
+                    <option value="GOLD">GOLD</option>
+                </select>
             </div>
 
             <button

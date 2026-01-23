@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import CryptoBanner from '@/components/CryptoBanner';
+import MarketTicker from '@/components/MarketTicker';
 import SignalFeed from '@/components/SignalFeed';
 
 export default function Home() {
@@ -14,6 +15,7 @@ export default function Home() {
       overflow: 'hidden' // For background overflow
     }}>
       <CryptoBanner />
+      <MarketTicker />
 
       <main style={{
         flex: 1,

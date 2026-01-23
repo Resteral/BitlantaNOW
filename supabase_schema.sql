@@ -10,6 +10,7 @@ create table if not exists public.signals (
   target_price numeric,
   stop_loss numeric,
   status text default 'ACTIVE' check (status in ('ACTIVE', 'CLOSED', 'CANCELED')),
+  tier text default 'FREE' check (tier in ('FREE', 'BRONZE', 'SILVER', 'GOLD')),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   closed_at timestamp with time zone
 );
@@ -18,7 +19,7 @@ create table if not exists public.signals (
 alter table public.signals enable row level security;
 
 -- Policies for signals
--- Everyone can view signals
+-- Everyone can view signals (we will filter in the app for now)
 create policy "Public signals are viewable by everyone"
   on public.signals for select
   using ( true );
@@ -36,6 +37,44 @@ create policy "Admins can delete signals"
   on public.signals for delete
   using ( auth.role() = 'authenticated' );
 
+-- USER TIERS TABLE
+create table if not exists public.user_tiers (
+  id uuid references auth.users on delete cascade primary key,
+  tier text default 'FREE' check (tier in ('FREE', 'BRONZE', 'SILVER', 'GOLD')),
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Enable RLS for user_tiers
+alter table public.user_tiers enable row level security;
+
+-- Policies for user_tiers
+create policy "Users can view their own tier"
+  on public.user_tiers for select
+  using ( auth.uid() = id );
+
+create policy "Admins can view all user tiers"
+  on public.user_tiers for select
+  using ( auth.role() = 'authenticated' );
+
+-- BOT TRADES TABLE
+create table if not exists public.trades (
+  id uuid default uuid_generate_v4() primary key,
+  pair text not null,
+  type text not null check (type in ('BUY', 'SELL')),
+  price numeric not null,
+  amount numeric not null,
+  total_val numeric not null,
+  tx_hash text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Enable RLS for trades
+alter table public.trades enable row level security;
+
+-- Policies for trades
+create policy "Admins can view all trades"
+  on public.trades for select
+  using ( auth.role() = 'authenticated' );
 
 -- BOT SETTINGS TABLE
 create table if not exists public.bot_settings (
