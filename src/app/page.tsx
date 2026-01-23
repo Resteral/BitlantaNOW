@@ -1,5 +1,6 @@
+'use client';
+
 import Link from 'next/link';
-import CryptoBanner from '@/components/CryptoBanner';
 import MarketTicker from '@/components/MarketTicker';
 import SignalFeed from '@/components/SignalFeed';
 
