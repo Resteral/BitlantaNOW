@@ -28,26 +28,56 @@ export default function Home() {
 
         {/* HERO SECTION */}
         <div style={{ textAlign: 'center', marginBottom: '6rem' }}>
-          <h1 style={{
-            fontSize: '5rem',
-            fontWeight: 900,
-            letterSpacing: '-0.05em',
-            display: 'inline-flex',
-            alignItems: 'center',
-            marginBottom: '1rem',
-            filter: 'drop-shadow(0 0 20px rgba(57, 255, 20, 0.3))'
-          }}>
-            {/* "BIT" Box */}
-            <span style={{
-              background: 'var(--neon-green)',
-              color: '#050214',
-              padding: '0 0.5rem',
-              marginRight: '0.2rem',
-              borderRadius: '8px',
-              border: '2px solid rgba(255,255,255,0.2)'
-            }}>BIT</span>
-            <span style={{ color: '#fff' }}>LANTA</span>
-          </h1>
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            {/* Retro City Silhouette */}
+            <div style={{
+              position: 'absolute',
+              bottom: '90%', // Moved down slightly to overlap/sit on top
+              left: '26%', // Aligned specifically over "BIT"
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              alignItems: 'flex-end',
+              gap: '2px', // Tighter gap
+              zIndex: 0,
+              opacity: 0.8,
+              pointerEvents: 'none',
+              filter: 'drop-shadow(0 0 8px var(--neon-purple))'
+            }}>
+              {/* Cityscape Nodes over BIT */}
+              <div style={{ width: '10px', height: '25px', background: 'var(--neon-green)' }}></div>
+              <div style={{ width: '18px', height: '45px', background: 'var(--neon-purple)' }}></div>
+              <div style={{ width: '12px', height: '35px', background: 'var(--neon-green)' }}></div>
+              <div style={{ width: '8px', height: '20px', background: 'var(--neon-purple)' }}></div>
+              {/* Temple Dome */}
+              <div style={{
+                width: '24px',
+                height: '30px',
+                background: 'var(--neon-green)',
+                borderRadius: '50% 50% 0 0',
+              }}></div>
+            </div>
+
+            <h1 style={{
+              fontSize: '5rem',
+              fontWeight: 900,
+              letterSpacing: '-0.05em',
+              display: 'inline-flex',
+              alignItems: 'center',
+              marginBottom: '1rem',
+              filter: 'drop-shadow(0 0 20px rgba(57, 255, 20, 0.3))'
+            }}>
+              {/* "BIT" Box */}
+              <span style={{
+                background: 'var(--neon-green)',
+                color: '#050214',
+                padding: '0 0.5rem',
+                marginRight: '0.2rem',
+                borderRadius: '8px',
+                border: '2px solid rgba(255,255,255,0.2)'
+              }}>BIT</span>
+              <span style={{ color: '#fff' }}>LANTA</span>
+            </h1>
+          </div>
 
           <h2 style={{
             fontSize: '1.5rem',
