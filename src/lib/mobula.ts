@@ -5,6 +5,7 @@ export interface MobulaTokenData {
     market_cap: number;
     liquidity: number;
     logo?: string;
+    address?: string;
 }
 
 const MOBULA_API_BASE = 'https://api.mobula.io/api/1';
@@ -61,5 +62,34 @@ export async function getMultiTokenPrices(addresses: string[]): Promise<Record<s
     } catch (error) {
         console.error('Mobula Multi-Price Error:', error);
         return {};
+    }
+}
+
+export async function getTrendingTokens(): Promise<MobulaTokenData[]> {
+    try {
+        // Fetch trending - using a query to get recently listed or hot tokens
+        // Fallback to a query for Solana tokens sorted by creation if trending specific endpoint isn't documented/verified,
+        // but 'market/trends' is a common pattern. Let's try to query with a volume filter.
+        // Mobula often uses /market/query
+        const response = await fetch(`${MOBULA_API_BASE}/market/query?blockchain=solana&limit=10&sortBy=createdAt&sortOrder=desc`);
+
+        if (!response.ok) return [];
+
+        const { data } = await response.json();
+
+        if (!data || !Array.isArray(data)) return [];
+
+        return data.map((token: any) => ({
+            name: token.name,
+            symbol: token.symbol,
+            price: token.price || 0,
+            market_cap: token.market_cap || 0,
+            liquidity: token.liquidity || 0,
+            logo: token.logo,
+            address: token.address
+        }));
+    } catch (error) {
+        console.error('Mobula Trending Error:', error);
+        return [];
     }
 }

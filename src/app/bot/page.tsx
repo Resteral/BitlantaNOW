@@ -5,7 +5,7 @@ import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { PublicKey, LAMPORTS_PER_SOL, Transaction, SystemProgram } from '@solana/web3.js';
 import { SolanaProvider } from '@/components/SolanaProvider';
-import { getTokenMetadata, getSolPrice, getMultiTokenPrices, MobulaTokenData } from '@/lib/mobula';
+import { getTokenMetadata, getSolPrice, getMultiTokenPrices, getTrendingTokens, MobulaTokenData } from '@/lib/mobula';
 
 // Removed problematic dynamic import
 
@@ -42,6 +42,9 @@ function BotInterface() {
     const [slippage, setSlippage] = useState('15');
     const [priorityFee, setPriorityFee] = useState('0.001');
     const [tokenInfo, setTokenInfo] = useState<MobulaTokenData | null>(null);
+
+    // Auto Discovery
+    const [autoDiscovery, setAutoDiscovery] = useState(false);
 
     // Automation: Auto-Sell (TP/SL)
     const [takeProfit, setTakeProfit] = useState('100'); // 100% (2x)
@@ -107,6 +110,42 @@ function BotInterface() {
             setTokenInfo(null);
         }
     }, [contractAddress, autoSnipe, snipeMode]);
+
+    // Auto Discovery Logic
+    useEffect(() => {
+        if (!autoDiscovery || !snipeMode) return;
+
+        const discover = async () => {
+            setStatus('AUTO_DISCOVERY: Scanning for trending tokens...');
+            try {
+                const trending = await getTrendingTokens();
+                if (trending && trending.length > 0) {
+                    // Filter for targets with liquidity > $5,000 for safety
+                    const viableTargets = trending.filter(t => t.liquidity > 5000);
+
+                    // Sort by liquidity descending to pick the strongest token
+                    viableTargets.sort((a, b) => b.liquidity - a.liquidity);
+
+                    const target = viableTargets.length > 0 ? viableTargets[0] : null;
+
+                    if (target && target.address && target.address !== contractAddress) {
+                        setStatus(`AUTO_DISCOVERY: Found safe target ${target.symbol} ($${target.liquidity.toLocaleString()} Liq)! Switching...`);
+                        setContractAddress(target.address);
+                        // The primary effect will pick this up, fetch detailed metadata, and trigger autoSnipe if enabled
+                    } else if (!target) {
+                        setStatus('AUTO_DISCOVERY: No targets met liquidity requirements (min $5k).');
+                    }
+                }
+            } catch (err) {
+                console.error('Auto discovery error:', err);
+            }
+        };
+
+        const interval = setInterval(discover, 10000); // Scan every 10s
+        discover(); // Initial scan
+
+        return () => clearInterval(interval);
+    }, [autoDiscovery, snipeMode, contractAddress]);
 
     // Auto-PnL Monitoring
     useEffect(() => {
@@ -281,6 +320,33 @@ function BotInterface() {
                                 boxShadow: autoSnipe ? '0 0 10px #f0b90b' : 'none'
                             }} />
                             AUTO_SNIPE: {autoSnipe ? 'ON' : 'OFF'}
+                        </button>
+                    )}
+                    {snipeMode && (
+                        <button
+                            onClick={() => setAutoDiscovery(!autoDiscovery)}
+                            style={{
+                                background: autoDiscovery ? 'rgba(1, 205, 254, 0.1)' : 'rgba(132, 142, 156, 0.1)',
+                                border: `1px solid ${autoDiscovery ? '#01cdfe' : '#2b2f36'}`,
+                                color: autoDiscovery ? '#01cdfe' : '#848e9c',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '4px',
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}
+                        >
+                            <span style={{
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                background: autoDiscovery ? '#01cdfe' : '#848e9c',
+                                boxShadow: autoDiscovery ? '0 0 10px #01cdfe' : 'none'
+                            }} />
+                            AUTO_DISCOVERY
                         </button>
                     )}
                     <button
