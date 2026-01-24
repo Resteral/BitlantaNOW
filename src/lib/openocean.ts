@@ -78,18 +78,28 @@ export async function createSwapTransaction(quoteResponse: OpenOceanQuoteRespons
     // Endpoint: /v3/solana/swap_quote
     // Body: { quote response data + sender }
 
+    if (!quoteResponse || !quoteResponse.data) {
+        throw new Error('Invalid quote response: missing data');
+    }
+
+    const { data } = quoteResponse;
+
+    // Defensive check for required fields to prevent "undefined reading 'address'"
+    if (!data.inToken || !data.outToken) {
+        throw new Error(`Invalid quote response: missing token info. inToken: ${!!data.inToken}, outToken: ${!!data.outToken}`);
+    }
+
     try {
         const response = await fetch(`${OPENOCEAN_API_BASE}/swap_quote`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                inTokenAddress: quoteResponse.data.inToken.address,
-                outTokenAddress: quoteResponse.data.outToken.address,
-                amount: quoteResponse.data.inAmount,
-                slippage: quoteResponse.data.slippage || 1,
+                inTokenAddress: data.inToken.address,
+                outTokenAddress: data.outToken.address,
+                amount: data.inAmount,
+                slippage: data.slippage || 1,
                 account: userPublicKey,
                 gasPrice: 0.000001, // Default or from quote
-                // OpenOcean specific fields might be needed from quoteResponse.data
             }),
         });
 
