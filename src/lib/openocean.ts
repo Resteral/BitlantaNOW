@@ -3,7 +3,7 @@
  * Based on OpenOcean v3 Solana API
  */
 
-const OPENOCEAN_API_BASE = 'https://open-api.openocean.finance/v3/solana';
+const OPENOCEAN_API_BASE = '/api/openocean';
 
 export interface QuoteRequest {
     inputMint: string;
