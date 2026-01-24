@@ -16,6 +16,25 @@ export interface TokenData {
     };
 }
 
+interface DexScreenerPair {
+    chainId: string;
+    baseToken: {
+        symbol: string;
+        name: string;
+    };
+    priceNative: string;
+    priceUsd: string;
+    fdv: number;
+    marketCap: number;
+    pairAddress: string;
+    priceChange: {
+        m5: number;
+        h1: number;
+        h6: number;
+        h24: number;
+    };
+}
+
 const DEFAULT_TOKENS = [
     'So11111111111111111111111111111111111111112', // SOL
     'JUPyiwrYJFv1mRiq4qp6fk6Cqn7o1dB79q75f8CQBg7', // JUP
@@ -36,9 +55,10 @@ export function useMarketData(tokenAddresses: string[] = DEFAULT_TOKENS) {
                 const json = await response.json();
 
                 // Filter and map to our interface
-                const mappedData: TokenData[] = (json.pairs || [])
-                    .filter((pair: any) => pair.chainId === 'solana') // Only SOL for now
-                    .map((pair: any) => ({
+                const pairs: DexScreenerPair[] = json.pairs || [];
+                const mappedData: TokenData[] = pairs
+                    .filter((pair: DexScreenerPair) => pair.chainId === 'solana') // Only SOL for now
+                    .map((pair: DexScreenerPair) => ({
                         symbol: pair.baseToken.symbol,
                         name: pair.baseToken.name,
                         priceNative: pair.priceNative,

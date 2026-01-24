@@ -27,7 +27,7 @@ export async function getQuote(params: QuoteRequest) {
     }
 }
 
-export async function createSwapTransaction(quoteResponse: any, userPublicKey: string) {
+export async function createSwapTransaction(quoteResponse: unknown, userPublicKey: string) {
     try {
         const response = await fetch(JUPITER_SWAP_API, {
             method: 'POST',

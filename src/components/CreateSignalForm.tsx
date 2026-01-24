@@ -37,8 +37,9 @@ export default function CreateSignalForm() {
             setEntry('');
             setTarget('');
             setStopLoss('');
-        } catch (error: any) {
-            setMessage('Transmission failed: ' + error.message);
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            setMessage('Transmission failed: ' + errorMessage);
         } finally {
             setLoading(false);
         }
@@ -105,7 +106,7 @@ export default function CreateSignalForm() {
                     <label style={{ display: 'block', marginBottom: '0.6rem', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '2px', color: '#fff' }}>TIER</label>
                     <select
                         value={tier}
-                        onChange={(e) => setTier(e.target.value as any)}
+                        onChange={(e) => setTier(e.target.value as 'FREE' | 'BRONZE' | 'SILVER' | 'GOLD')}
                         style={inputStyle}
                     >
                         <option value="FREE">FREE</option>

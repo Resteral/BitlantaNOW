@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 interface BotSettings {
+    id: string;
     is_active: boolean;
     default_trade_amount: number;
 }
@@ -50,7 +51,7 @@ export default function TradingBot() {
         const { error } = await supabase
             .from('bot_settings')
             .update({ is_active: newStatus })
-            .eq('id', (settings as any).id);
+            .eq('id', settings.id);
 
         if (!error) {
             setSettings({ ...settings, is_active: newStatus });
@@ -62,7 +63,7 @@ export default function TradingBot() {
         const { error } = await supabase
             .from('bot_settings')
             .update({ default_trade_amount: amount })
-            .eq('id', (settings as any).id);
+            .eq('id', settings.id);
 
         if (!error) {
             setSettings({ ...settings, default_trade_amount: amount });

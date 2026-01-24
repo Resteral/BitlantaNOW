@@ -65,6 +65,16 @@ export async function getMultiTokenPrices(addresses: string[]): Promise<Record<s
     }
 }
 
+interface MobulaApiResponse {
+    name: string;
+    symbol: string;
+    price: number;
+    market_cap: number;
+    liquidity: number;
+    logo?: string;
+    address?: string;
+}
+
 export async function getTrendingTokens(): Promise<MobulaTokenData[]> {
     try {
         // Fetch trending - using a query to get recently listed or hot tokens
@@ -79,7 +89,7 @@ export async function getTrendingTokens(): Promise<MobulaTokenData[]> {
 
         if (!data || !Array.isArray(data)) return [];
 
-        return data.map((token: any) => ({
+        return data.map((token: MobulaApiResponse) => ({
             name: token.name,
             symbol: token.symbol,
             price: token.price || 0,

@@ -15,7 +15,6 @@ export default function UserManagement() {
     const [error, setError] = useState<string | null>(null);
 
     const fetchUsers = useCallback(async () => {
-        setLoading(true);
         const { data, error } = await supabase
             .from('user_tiers')
             .select('*')
@@ -30,10 +29,23 @@ export default function UserManagement() {
     }, []);
 
     useEffect(() => {
-        fetchUsers();
-    }, [fetchUsers]);
+        const loadInitial = async () => {
+            const { data, error } = await supabase
+                .from('user_tiers')
+                .select('*')
+                .order('updated_at', { ascending: false });
 
-    const updateTier = async (userId: string, newTier: string) => {
+            if (error) {
+                setError(error.message);
+            } else {
+                setUsers(data || []);
+            }
+            setLoading(false);
+        };
+        loadInitial();
+    }, []);
+
+    const updateTier = async (userId: string, newTier: UserTier['tier']) => {
         const { error } = await supabase
             .from('user_tiers')
             .update({ tier: newTier, updated_at: new Date().toISOString() })
@@ -42,7 +54,7 @@ export default function UserManagement() {
         if (error) {
             alert('Failed to update tier: ' + error.message);
         } else {
-            setUsers(users.map(u => u.id === userId ? { ...u, tier: newTier as any } : u));
+            setUsers(users.map(u => u.id === userId ? { ...u, tier: newTier } : u));
         }
     };
 
@@ -82,7 +94,7 @@ export default function UserManagement() {
                                 <td style={{ padding: '1rem 0.8rem' }}>
                                     <select
                                         value={user.tier}
-                                        onChange={(e) => updateTier(user.id, e.target.value)}
+                                        onChange={(e) => updateTier(user.id, e.target.value as UserTier['tier'])}
                                         style={{
                                             background: 'rgba(0,0,0,0.3)',
                                             border: '1px solid rgba(255,255,255,0.1)',
@@ -112,7 +124,7 @@ export default function UserManagement() {
             </div>
 
             <button
-                onClick={fetchUsers}
+                onClick={() => { setLoading(true); fetchUsers(); }}
                 className="vapor-sub-btn"
                 style={{
                     background: 'rgba(255,255,255,0.05)',

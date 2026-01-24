@@ -21,7 +21,6 @@ export default function SignalManagement() {
     const [error, setError] = useState<string | null>(null);
 
     const fetchSignals = async () => {
-        setLoading(true);
         const { data, error } = await supabase
             .from('signals')
             .select('*')
@@ -36,10 +35,23 @@ export default function SignalManagement() {
     };
 
     useEffect(() => {
-        fetchSignals();
+        const loadInitial = async () => {
+            const { data, error } = await supabase
+                .from('signals')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                setError(error.message);
+            } else {
+                setSignals(data || []);
+            }
+            setLoading(false);
+        };
+        loadInitial();
     }, []);
 
-    const updateStatus = async (id: string, newStatus: string) => {
+    const updateStatus = async (id: string, newStatus: Signal['status']) => {
         const { error } = await supabase
             .from('signals')
             .update({
@@ -51,7 +63,7 @@ export default function SignalManagement() {
         if (error) {
             alert('Failed to update status: ' + error.message);
         } else {
-            setSignals(signals.map(s => s.id === id ? { ...s, status: newStatus as any } : s));
+            setSignals(signals.map(s => s.id === id ? { ...s, status: newStatus } : s));
         }
     };
 
@@ -136,7 +148,7 @@ export default function SignalManagement() {
             </div>
 
             <button
-                onClick={fetchSignals}
+                onClick={() => { setLoading(true); fetchSignals(); }}
                 className="vapor-sub-btn"
                 style={{
                     background: 'rgba(255,255,255,0.05)',
