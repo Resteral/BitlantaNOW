@@ -35,7 +35,7 @@ export default function SignalManagement() {
     };
 
     useEffect(() => {
-        const loadInitial = async () => {
+        const load = async () => {
             const { data, error } = await supabase
                 .from('signals')
                 .select('*')
@@ -48,7 +48,7 @@ export default function SignalManagement() {
             }
             setLoading(false);
         };
-        loadInitial();
+        load();
     }, []);
 
     const updateStatus = async (id: string, newStatus: Signal['status']) => {

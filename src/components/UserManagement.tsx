@@ -29,7 +29,7 @@ export default function UserManagement() {
     }, []);
 
     useEffect(() => {
-        const loadInitial = async () => {
+        const load = async () => {
             const { data, error } = await supabase
                 .from('user_tiers')
                 .select('*')
@@ -42,7 +42,7 @@ export default function UserManagement() {
             }
             setLoading(false);
         };
-        loadInitial();
+        load();
     }, []);
 
     const updateTier = async (userId: string, newTier: UserTier['tier']) => {

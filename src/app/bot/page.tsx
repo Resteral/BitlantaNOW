@@ -56,152 +56,7 @@ function BotInterface() {
     // Trade History / Ledger
     const [trades, setTrades] = useState<Trade[]>([]);
 
-    useEffect(() => {
-        if (!publicKey) return;
-
-        const getBalance = async () => {
-            try {
-                const info = await connection.getAccountInfo(publicKey);
-                if (info) {
-                    setBalance(info.lamports / LAMPORTS_PER_SOL);
-                } else {
-                    setBalance(0); // Account exists (on curve) but has no data/SOL, or new account
-                }
-            } catch (error) {
-                console.error('Failed to fetch balance:', error);
-                setBalance(0);
-            }
-            const price = await getSolPrice();
-            setSolPrice(price);
-        };
-
-        getBalance();
-        const id = connection.onAccountChange(publicKey, (account) => {
-            setBalance(account.lamports / LAMPORTS_PER_SOL);
-        });
-
-        const interval = setInterval(getBalance, 30000); // 30s refresh
-
-        return () => {
-            connection.removeAccountChangeListener(id);
-            clearInterval(interval);
-        };
-    }, [publicKey, connection]);
-
-    // Real Token lookup & Auto-Snipe trigger
-    useEffect(() => {
-        if (contractAddress.length > 30) {
-            const lookup = async () => {
-                const data = await getTokenMetadata(contractAddress);
-                if (data) {
-                    setTokenInfo(data);
-                    if (autoSnipe && snipeMode) {
-                        // Autonomous Safety Check: Don't snipe if liquidity < $5k
-                        if (data.liquidity < 5000) {
-                            setStatus('SNIPE_ABORTED: Low Liquidity detected.');
-                        } else {
-                            handleTrade('SNIPE');
-                        }
-                    }
-                } else {
-                    setTokenInfo(null);
-                }
-            };
-            lookup();
-        } else {
-            setTokenInfo(null);
-        }
-    }, [contractAddress, autoSnipe, snipeMode]);
-
-    // Auto Discovery Logic
-    useEffect(() => {
-        if (!autoDiscovery || !snipeMode) return;
-
-        const discover = async () => {
-            setStatus('AUTO_DISCOVERY: Scanning for trending tokens...');
-            try {
-                const trending = await getTrendingTokens();
-                if (trending && trending.length > 0) {
-                    // Filter for targets with liquidity > $5,000 for safety
-                    const viableTargets = trending.filter(t => t.liquidity > 5000);
-
-                    // Sort by liquidity descending to pick the strongest token
-                    viableTargets.sort((a, b) => b.liquidity - a.liquidity);
-
-                    const target = viableTargets.length > 0 ? viableTargets[0] : null;
-
-                    if (target && target.address && target.address !== contractAddress) {
-                        setStatus(`AUTO_DISCOVERY: Found safe target ${target.symbol} ($${target.liquidity.toLocaleString()} Liq)! Switching...`);
-                        setContractAddress(target.address);
-                        // The primary effect will pick this up, fetch detailed metadata, and trigger autoSnipe if enabled
-                    } else if (!target) {
-                        setStatus('AUTO_DISCOVERY: No targets met liquidity requirements (min $5k).');
-                    }
-                }
-            } catch (err) {
-                console.error('Auto discovery error:', err);
-            }
-        };
-
-        const interval = setInterval(discover, 10000); // Scan every 10s
-        discover(); // Initial scan
-
-        return () => clearInterval(interval);
-    }, [autoDiscovery, snipeMode, contractAddress]);
-
-    // Auto-PnL Monitoring
-    useEffect(() => {
-        const monitorPnL = async () => {
-            const activeTrades = trades.filter(t => t.status === 'CONFIRMED');
-            if (activeTrades.length === 0) return;
-
-            const nonSolAddresses = Array.from(new Set(
-                activeTrades
-                    .filter(t => t.asset !== 'SOL' && t.ca)
-                    .map(t => t.ca)
-            ));
-
-            const prices = await getMultiTokenPrices(nonSolAddresses as string[]);
-
-            setTrades(prev => prev.map(trade => {
-                if (trade.status !== 'CONFIRMED') return trade;
-
-                const currentPrice = trade.asset === 'SOL' ? solPrice : (prices[trade.ca] || trade.currentPrice);
-                const pnlPercent = ((currentPrice - trade.entryPrice) / trade.entryPrice) * 100;
-                const pnlUsd = (pnlPercent / 100) * (parseFloat(trade.amount) * (trade.asset === 'SOL' ? solPrice : trade.entryPrice));
-
-                return {
-                    ...trade,
-                    currentPrice,
-                    pnlPercent: isNaN(pnlPercent) ? 0 : pnlPercent,
-                    pnlUsd: isNaN(pnlUsd) ? 0 : pnlUsd
-                };
-            }));
-        };
-
-        const interval = setInterval(monitorPnL, 10000); // 10s PnL refresh
-        return () => clearInterval(interval);
-    }, [trades, solPrice]);
-
-    // Auto-Sell Monitoring
-    useEffect(() => {
-        if (!autoSell) return;
-
-        const monitor = setInterval(() => {
-            trades.forEach(trade => {
-                if (trade.status === 'CONFIRMED' && trade.type === 'BUY') {
-                    if (trade.pnlPercent >= parseFloat(takeProfit) || trade.pnlPercent <= -parseFloat(stopLoss)) {
-                        setStatus(`AUTO_SELL: Target Hit for ${trade.asset}! PnL: ${trade.pnlPercent.toFixed(2)}%`);
-                        handleTrade('SELL');
-                    }
-                }
-            });
-        }, 5000);
-
-        return () => clearInterval(monitor);
-    }, [autoSell, trades, takeProfit, stopLoss]);
-
-    const handleTrade = async (type: 'BUY' | 'SELL' | 'SNIPE') => {
+    const handleTrade = React.useCallback(async (type: 'BUY' | 'SELL' | 'SNIPE') => {
         if (!publicKey) {
             setStatus('Please connect your wallet first.');
             return;
@@ -289,7 +144,154 @@ function BotInterface() {
             const errorMessage = err instanceof Error ? err.message : 'Unknown error';
             setStatus(`Error: ${errorMessage} (Ensure Balance/RPC)`);
         }
-    };
+    }, [publicKey, tokenInfo, solPrice, snipeMode, contractAddress, amount, balance, slippage, sendTransaction, connection]);
+
+    useEffect(() => {
+        if (!publicKey) return;
+
+        const getBalance = async () => {
+            try {
+                const info = await connection.getAccountInfo(publicKey);
+                if (info) {
+                    setBalance(info.lamports / LAMPORTS_PER_SOL);
+                } else {
+                    setBalance(0); // Account exists (on curve) but has no data/SOL, or new account
+                }
+            } catch (error) {
+                console.error('Failed to fetch balance:', error);
+                setBalance(0);
+            }
+            const price = await getSolPrice();
+            setSolPrice(price);
+        };
+
+        getBalance();
+        const id = connection.onAccountChange(publicKey, (account) => {
+            setBalance(account.lamports / LAMPORTS_PER_SOL);
+        });
+
+        const interval = setInterval(getBalance, 30000); // 30s refresh
+
+        return () => {
+            connection.removeAccountChangeListener(id);
+            clearInterval(interval);
+        };
+    }, [publicKey, connection]);
+
+    // Real Token lookup & Auto-Snipe trigger
+    useEffect(() => {
+        if (contractAddress.length > 30) {
+            const lookup = async () => {
+                const data = await getTokenMetadata(contractAddress);
+                if (data) {
+                    setTokenInfo(data);
+                    if (autoSnipe && snipeMode) {
+                        // Autonomous Safety Check: Don't snipe if liquidity < $5k
+                        if (data.liquidity < 5000) {
+                            setStatus('SNIPE_ABORTED: Low Liquidity detected.');
+                        } else {
+                            handleTrade('SNIPE');
+                        }
+                    }
+                } else {
+                    setTokenInfo(null);
+                }
+            };
+            lookup();
+        } else {
+            setTokenInfo(null);
+        }
+    }, [contractAddress, autoSnipe, snipeMode, handleTrade]);
+
+    // Auto Discovery Logic
+    useEffect(() => {
+        if (!autoDiscovery || !snipeMode) return;
+
+        const discover = async () => {
+            setStatus('AUTO_DISCOVERY: Scanning for trending tokens...');
+            try {
+                const trending = await getTrendingTokens();
+                if (trending && trending.length > 0) {
+                    // Filter for targets with liquidity > $5,000 for safety
+                    const viableTargets = trending.filter(t => t.liquidity > 5000);
+
+                    // Sort by liquidity descending to pick the strongest token
+                    viableTargets.sort((a, b) => b.liquidity - a.liquidity);
+
+                    const target = viableTargets.length > 0 ? viableTargets[0] : null;
+
+                    if (target && target.address && target.address !== contractAddress) {
+                        setStatus(`AUTO_DISCOVERY: Found safe target ${target.symbol} ($${target.liquidity.toLocaleString()} Liq)! Switching...`);
+                        setContractAddress(target.address);
+                        // The primary effect will pick this up, fetch detailed metadata, and trigger autoSnipe if enabled
+                    } else if (!target) {
+                        setStatus('AUTO_DISCOVERY: No targets met liquidity requirements (min $5k).');
+                    }
+                }
+            } catch (err) {
+                console.error('Auto discovery error:', err);
+            }
+        };
+
+        const interval = setInterval(discover, 10000); // Scan every 10s
+        discover(); // Initial scan
+
+        return () => clearInterval(interval);
+    }, [autoDiscovery, snipeMode, contractAddress]);
+
+    // Auto-PnL Monitoring
+    useEffect(() => {
+        const monitorPnL = async () => {
+            const activeTrades = trades.filter(t => t.status === 'CONFIRMED');
+            if (activeTrades.length === 0) return;
+
+            const nonSolAddresses = Array.from(new Set(
+                activeTrades
+                    .filter(t => t.asset !== 'SOL' && t.ca)
+                    .map(t => t.ca)
+            ));
+
+            const prices = await getMultiTokenPrices(nonSolAddresses as string[]);
+
+            setTrades(prev => prev.map(trade => {
+                if (trade.status !== 'CONFIRMED') return trade;
+
+                const currentPrice = trade.asset === 'SOL' ? solPrice : (prices[trade.ca] || trade.currentPrice);
+                const pnlPercent = ((currentPrice - trade.entryPrice) / trade.entryPrice) * 100;
+                const pnlUsd = (pnlPercent / 100) * (parseFloat(trade.amount) * (trade.asset === 'SOL' ? solPrice : trade.entryPrice));
+
+                return {
+                    ...trade,
+                    currentPrice,
+                    pnlPercent: isNaN(pnlPercent) ? 0 : pnlPercent,
+                    pnlUsd: isNaN(pnlUsd) ? 0 : pnlUsd
+                };
+            }));
+        };
+
+        const interval = setInterval(monitorPnL, 10000); // 10s PnL refresh
+        return () => clearInterval(interval);
+    }, [trades, solPrice]);
+
+    // Auto-Sell Monitoring
+    useEffect(() => {
+        if (!autoSell) return;
+
+        const monitor = setInterval(() => {
+            trades.forEach(trade => {
+                if (trade.status === 'CONFIRMED' && trade.type === 'BUY') {
+                    if (trade.pnlPercent >= parseFloat(takeProfit) || trade.pnlPercent <= -parseFloat(stopLoss)) {
+                        setStatus(`AUTO_SELL: Target Hit for ${trade.asset}! PnL: ${trade.pnlPercent.toFixed(2)}%`);
+                        handleTrade('SELL');
+                    }
+                }
+            });
+        }, 5000);
+
+        return () => clearInterval(monitor);
+    }, [autoSell, trades, takeProfit, stopLoss, handleTrade]);
+
+
 
     const usdBalance = balance ? (balance * solPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
 

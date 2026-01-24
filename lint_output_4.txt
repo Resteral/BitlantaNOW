@@ -1,0 +1,14 @@
+﻿
+> bitlanta@0.1.0 lint
+> eslint
+
+
+C:\Users\Sean\.gemini\antigravity\scratch\bitlanta\src\app\bot\page.tsx
+    6:10  warning  'PublicKey' is defined but never used                                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+    6:39  warning  'Transaction' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+    6:52  warning  'SystemProgram' is defined but never used                                                                                                                                                                                                                                                @typescript-eslint/no-unused-vars
+  438:60  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  508:68  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+Γ£û 5 problems (0 errors, 5 warnings)
+
