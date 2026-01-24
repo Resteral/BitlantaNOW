@@ -49,8 +49,11 @@ export async function getQuote(params: QuoteRequest) {
 
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Failed to fetch quote from OpenOcean');
         const data = await response.json();
+
+        if (!response.ok || (data.code !== 200 && data.code !== 0)) {
+            throw new Error(data.error || data.message || `OpenOcean Quote Failed (Code: ${data.code})`);
+        }
 
         // OpenOcean returns { code: 200, data: { ... } } or similar
         // We need to return it in a way our bot expects, or adapt the bot.
@@ -99,12 +102,16 @@ export async function createSwapTransaction(quoteResponse: OpenOceanQuoteRespons
                 amount: data.inAmount,
                 slippage: data.slippage || 1,
                 account: userPublicKey,
-                gasPrice: 0.000001, // Default or from quote
+                gasPrice: data.gasPrice || 0.000005, // Use quote gas price or higher default
             }),
         });
 
-        if (!response.ok) throw new Error('Failed to create swap transaction');
         const result = await response.json();
+
+        if (!response.ok || (result.code !== 200 && result.code !== 0)) {
+            throw new Error(result.error || result.message || `OpenOcean Swap Failed (Code: ${result.code})`);
+        }
+
         return {
             swapTransaction: result.data.transaction, // Verify field name (usually 'transaction' or 'tx')
         };

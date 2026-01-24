@@ -6,24 +6,7 @@ import { useMarketData } from '@/lib/hooks/useMarketData';
 export default function MarketTicker() {
     const { data, loading, error } = useMarketData();
 
-    const [lantData, setLantData] = React.useState({ price: 0.0042, change: 1.25 });
-
-    React.useEffect(() => {
-        setLantData({
-            price: 0.0042 + (Math.random() * 0.0001),
-            change: 1.25 + (Math.random() * 0.5)
-        });
-    }, []);
-
-    if (error) return null;
-
-    const lantPrice = lantData.price;
-    const lantChange = lantData.change;
-
-    const tickerItems = loading ? [] : [
-        { symbol: 'LANT', priceUsd: lantPrice.toFixed(4), priceChange: { h24: lantChange } },
-        ...data
-    ];
+    const tickerItems = loading ? [] : data;
 
     return (
         <div style={{

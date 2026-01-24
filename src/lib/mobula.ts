@@ -35,12 +35,12 @@ export async function getTokenMetadata(address: string, blockchain: string = 'so
 export async function getSolPrice(): Promise<number> {
     try {
         const response = await fetch(`${MOBULA_API_BASE}/market/data?asset=solana`);
-        if (!response.ok) return 245.82; // Fallback
+        if (!response.ok) return 0;
 
         const { data } = await response.json();
-        return data?.price || 245.82;
+        return data?.price || 0;
     } catch {
-        return 245.82;
+        return 0;
     }
 }
 export async function getMultiTokenPrices(addresses: string[]): Promise<Record<string, number>> {

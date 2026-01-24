@@ -33,7 +33,7 @@ function BotInterface() {
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
     const [balance, setBalance] = useState<number | null>(null);
-    const [solPrice, setSolPrice] = useState(245.82);
+    const [solPrice, setSolPrice] = useState(0);
     const [amount, setAmount] = useState('0.1');
     const [status, setStatus] = useState<string | null>(null);
 
