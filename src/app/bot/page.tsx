@@ -6,7 +6,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { PublicKey, LAMPORTS_PER_SOL, Transaction, SystemProgram } from '@solana/web3.js';
 import { SolanaProvider } from '@/components/SolanaProvider';
 import { getTokenMetadata, getSolPrice, getMultiTokenPrices, getTrendingTokens, MobulaTokenData } from '@/lib/mobula';
-import { getQuote, createSwapTransaction } from '@/lib/jupiter';
+import { getQuote, createSwapTransaction } from '@/lib/openocean';
 import { VersionedTransaction } from '@solana/web3.js';
 
 // Removed problematic dynamic import
@@ -86,33 +86,38 @@ function BotInterface() {
 
         try {
             const action = type === 'SNIPE' ? 'SNIPING' : `${type}ing`;
-            setStatus(`Initiating ${action} order for ${newTrade.asset}...`);
+            setStatus(`Initiating ${action} order for ${newTrade.asset} via OpenOcean...`);
 
-            // Jupiter Swap Logic
+            // OpenOcean Swap Logic
             const inputMint = (type === 'BUY' || type === 'SNIPE') ? 'So11111111111111111111111111111111111111112' : (contractAddress || 'So11111111111111111111111111111111111111112');
             const outputMint = (type === 'BUY' || type === 'SNIPE') ? (contractAddress || 'So11111111111111111111111111111111111111112') : 'So11111111111111111111111111111111111111112';
 
-            // Amount in lamports/units (assuming 9 decimals for SOL, need improvements for other tokens if sell)
-            // For simplicity, we are handling SOL amount mostly. If selling a token, we need its decimals.
-            // Usually input `amount` is in UI terms (SOL or Tokens). 
-            // Let's implement BUY/SNIPE (SOL -> Token) flow robustly first.
-            const amountInLamports = Math.floor(parseFloat(amount) * LAMPORTS_PER_SOL);
+            // Amount: 
+            // OpenOcean amount usage varies by token decimals.
+            // For SOL (So111...) it usually expects human readable amount if standard API, 
+            // but our wrapper might need adjustment based on test results. 
+            // Let's pass the amount as "human readable" string or number based on standard DEX aggregator behavior 
+            // if 'atoms' didn't look right in test.
+            // Wait, previous step I implemented `getQuote` to take `amount` and just pass it.
+            // If I pass `0.1` SOL to OpenOcean API, does it work?
+            // Test script used `amount=1` and got `127...` which is ~127 USDC if outToken was USDC.
+            // So `amount` in OO API is likely human readable.
+            // Jupiter used lamports (amount * 10^9).
+            // So here I should pass `parseFloat(amount)` (HUMAN READABLE).
 
-            if (type === 'SELL' && (!tokenInfo || !balance)) { // Simple check, real implementation needs token account balance
-                throw new Error('Sell not fully simulated without token balance check');
-            }
-
-            // Get Quote
             const quote = await getQuote({
                 inputMint,
                 outputMint,
-                amount: amountInLamports,
+                amount: parseFloat(amount), // Human readable for OpenOcean
                 slippageBps: parseFloat(slippage) * 100
             });
 
-            if (!quote) throw new Error('No quote found');
+            if (!quote || quote.code !== 200) throw new Error('No quote found or API error: ' + (quote?.error || 'Unknown'));
 
             // Create Swap Transaction
+            // OpenOcean returns tx in `data.transaction` usually?
+            // My wrapper extracts `result.data.transaction`.
+
             const swapResult = await createSwapTransaction(quote, publicKey.toString());
 
             if (!swapResult || !swapResult.swapTransaction) throw new Error('Failed to create swap transaction');
@@ -144,7 +149,7 @@ function BotInterface() {
             const errorMessage = err instanceof Error ? err.message : 'Unknown error';
             setStatus(`Error: ${errorMessage} (Ensure Balance/RPC)`);
         }
-    }, [publicKey, tokenInfo, solPrice, snipeMode, contractAddress, amount, balance, slippage, sendTransaction, connection]);
+    }, [publicKey, tokenInfo, solPrice, snipeMode, contractAddress, amount, slippage, sendTransaction, connection]);
 
     useEffect(() => {
         if (!publicKey) return;
