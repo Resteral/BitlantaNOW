@@ -1,6 +1,21 @@
 import { Stripe } from 'stripe';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
+
+function logWithError(msg: string, error?: any) {
+    const logFile = path.resolve(process.cwd(), 'checkout_debug.log');
+    const timestamp = new Date().toISOString();
+    const errorStr = error ? `\nError: ${error.message}\nStack: ${error.stack}` : '';
+    try {
+        fs.appendFileSync(logFile, `${timestamp}: ${msg}${errorStr}\n`);
+    } catch (e) {
+        // Fallback if fs fails
+        console.error('Failed to write to log file:', e);
+    }
+    console.log(msg, error || '');
+}
 
 // Initialize Stripe lazily to avoid build-time errors if env vars are missing
 const getStripe = () => {
@@ -13,19 +28,33 @@ const getStripe = () => {
     });
 };
 
+export async function GET(req: Request) {
+    logWithError('[Checkout] GET request received - Debugging check');
+    return NextResponse.json({ status: 'API is working', timestamp: new Date().toISOString() });
+}
+
 export async function POST(req: Request) {
     try {
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
+        const { tier, amount, name, currency = 'usd' } = await req.json();
+
+        logWithError(`[Checkout] User: ${user?.id}, Tier: ${tier}, Amount: ${amount}`);
+
         if (!user) {
-            return new NextResponse('Unauthorized', { status: 401 });
+            logWithError('[Checkout] Unauthorized: No user found');
+            return new NextResponse(JSON.stringify({ error: 'Unauthorized: Please log in' }), {
+                status: 401,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
 
-        const { tier, priceId } = await req.json();
-
-        if (!priceId) {
-            return new NextResponse('Missing priceId', { status: 400 });
+        if (!amount || !name) {
+            return new NextResponse(JSON.stringify({ error: 'Missing amount or name' }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' }
+            });
         }
 
         const origin = req.headers.get('origin') || 'http://localhost:3000';
@@ -36,7 +65,16 @@ export async function POST(req: Request) {
             payment_method_types: ['card'],
             line_items: [
                 {
-                    price: priceId,
+                    price_data: {
+                        currency: currency.toLowerCase(),
+                        product_data: {
+                            name: name,
+                        },
+                        unit_amount: Math.round(amount * 100), // Convert to cents
+                        recurring: {
+                            interval: 'month',
+                        },
+                    },
                     quantity: 1,
                 },
             ],
@@ -52,7 +90,18 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ url: session.url });
     } catch (error: any) {
-        console.error('Stripe Checkout Error:', error);
-        return new NextResponse(error.message || 'Internal Server Error', { status: 500 });
+        logWithError('Stripe Checkout Error:', error);
+        return new NextResponse(
+            JSON.stringify({
+                error: error.message || 'Internal Server Error',
+                details: error.type || 'Unknown Type'
+            }),
+            {
+                status: 500,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
     }
 }

@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Check, Zap, Crown, Rocket, Star } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
 
 // Initialize Stripe outside of component to avoid recreating object on every render
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -30,6 +32,9 @@ interface SubscriptionPlansProps {
 export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
+  const supabase = createClient()
+  const router = useRouter()
+
 
   const plans: SubscriptionPlan[] = [
     {
@@ -83,6 +88,16 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
   const handlePurchase = async (plan: SubscriptionPlan) => {
     setSelectedPlan(plan.id)
     setProcessing(true)
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      alert("Please log in to purchase a subscription.")
+      router.push("/login") // Adjust path if needed, usually /auth/login or /login
+      setProcessing(false)
+      setSelectedPlan(null)
+      return
+    }
 
     try {
       const response = await fetch('/api/checkout', {
