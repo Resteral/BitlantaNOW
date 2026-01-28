@@ -100,17 +100,20 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
     }
 
     try {
+      const payload = {
+        tier: plan.id,
+        // We pass name/amount for dynamic price creation since we don't have hardcoded Price IDs yet
+        amount: plan.price,
+        name: plan.name
+      };
+      console.log("Sending checkout payload:", payload);
+
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          tier: plan.id,
-          // We pass name/amount for dynamic price creation since we don't have hardcoded Price IDs yet
-          amount: plan.price,
-          name: plan.name
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {

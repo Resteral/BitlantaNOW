@@ -8,7 +8,7 @@ interface AtlantisGateProps {
   level: number
 }
 
-export function AtlantisGate({ isOpen, level }: AtlantisGateProps) {
+export function AtlantisGate({ isOpen, level, price, tierName, onPurchase }: AtlantisGateProps & { price?: number, tierName?: string, onPurchase?: () => void }) {
   const [pulseIntensity, setPulseIntensity] = useState(0.5)
 
   useEffect(() => {
@@ -43,9 +43,15 @@ export function AtlantisGate({ isOpen, level }: AtlantisGateProps) {
                 </div>
               </div>
             ) : (
-              <div className="w-full h-full bg-gradient-to-b from-muted/50 via-border/30 to-muted/50 gate-shimmer rounded">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-lg font-mono text-muted-foreground/70">LOCKED</div>
+              <div className="w-full h-full bg-gradient-to-b from-muted/50 via-border/30 to-muted/50 gate-shimmer rounded group cursor-pointer" onClick={onPurchase}>
+                <div className="absolute inset-0 flex flex-col items-center justify-center space-y-2 p-2 text-center transition-transform duration-300 group-hover:scale-105">
+                  <div className="text-lg font-mono text-muted-foreground/70 group-hover:text-primary transition-colors">LOCKED</div>
+                  {price && (
+                    <>
+                      <div className="text-sm font-bold text-primary font-mono atlantis-glow">${price}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Unlock {tierName}</div>
+                    </>
+                  )}
                 </div>
               </div>
             )}

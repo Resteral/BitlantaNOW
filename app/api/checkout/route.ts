@@ -27,13 +27,28 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+    let bodyText = '';
     try {
+        // Clone request to read body safely for logging without consuming it for subsequent reads if needed
+        // (though we usually just read it once).
+        bodyText = await req.text();
+
+        console.log(`[Checkout] POST Raw Body: ${bodyText.slice(0, 500)}...`); // Log first 500 chars
+
+        let body;
+        try {
+            body = JSON.parse(bodyText);
+        } catch (e) {
+            console.error('[Checkout] JSON Parse Error:', e);
+            return new NextResponse(JSON.stringify({ error: 'Invalid JSON body' }), { status: 400 });
+        }
+
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
-        const { tier, amount, name, currency = 'usd' } = await req.json();
+        const { tier, amount, name, currency = 'usd' } = body;
 
-        logWithError(`[Checkout] User: ${user?.id}, Tier: ${tier}, Amount: ${amount}`);
+        logWithError(`[Checkout] User: ${user?.id}, Tier: ${tier}, Amount: ${amount}, Name: ${name}`);
 
         if (!user) {
             logWithError('[Checkout] Unauthorized: No user found');
@@ -44,8 +59,11 @@ export async function POST(req: Request) {
         }
 
         if (!amount || !name) {
+            const errorMsg = `Missing amount or name. Received: amount=${amount}, name=${name}, tier=${tier}`;
+            logWithError(`[Checkout] Validation Error: ${errorMsg}`);
             return new NextResponse(JSON.stringify({
-                error: `Missing amount or name. Received: amount=${amount}, name=${name}, tier=${tier}`
+                error: errorMsg,
+                receivedBody: body // Send back what we received to help debug
             }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' }
@@ -56,6 +74,7 @@ export async function POST(req: Request) {
 
         const stripe = getStripe();
 
+        // Create Checkout Session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [
@@ -89,7 +108,8 @@ export async function POST(req: Request) {
         return new NextResponse(
             JSON.stringify({
                 error: error.message || 'Internal Server Error',
-                details: error.type || 'Unknown Type'
+                details: error.type || 'Unknown Type',
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
             }),
             {
                 status: 500,

@@ -161,10 +161,28 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-            <AtlantisGate isOpen={false} level={1} />
-            <AtlantisGate isOpen={false} level={2} />
+            <AtlantisGate
+              isOpen={false}
+              level={1}
+              price={49.99}
+              tierName="BASIC"
+              onPurchase={() => handleSubscriptionPurchase("basic", 49.99)}
+            />
+            <AtlantisGate
+              isOpen={false}
+              level={2}
+              price={99.99}
+              tierName="PREMIUM"
+              onPurchase={() => handleSubscriptionPurchase("premium", 99.99)}
+            />
             <div className="sm:col-span-2 lg:col-span-1">
-              <AtlantisGate isOpen={false} level={3} />
+              <AtlantisGate
+                isOpen={false}
+                level={3}
+                price={199.99}
+                tierName="ELITE"
+                onPurchase={() => handleSubscriptionPurchase("elite", 199.99)}
+              />
             </div>
           </div>
 
@@ -176,6 +194,17 @@ export default function HomePage() {
             <Lock className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
             AWAKEN THE ANCIENT GATES
           </Button>
+
+          {/* Hidden Transaction Modal Trigger - Logic now handled by Gate clicks */}
+          {selectedPlan && (
+            <TransactionModal
+              isOpen={showTransactionModal}
+              onClose={() => setShowTransactionModal(false)}
+              planName={selectedPlan.name}
+              amount={selectedPlan.amount}
+              onSuccess={handleTransactionSuccess}
+            />
+          )}
 
           <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto">
             <Card className="bg-card/60 backdrop-blur-sm border-primary/20 underwater-float">
