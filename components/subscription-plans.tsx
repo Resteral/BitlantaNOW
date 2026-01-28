@@ -114,8 +114,15 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || errorData.error || 'Checkout request failed');
+        const text = await response.text();
+        let errorMsg = `Status: ${response.status}`;
+        try {
+          const data = JSON.parse(text);
+          errorMsg += ` - ${data.message || data.error || JSON.stringify(data)}`;
+        } catch (e) {
+          errorMsg += ` - Body: ${text.slice(0, 200)}`;
+        }
+        throw new Error(errorMsg);
       }
 
       const { url } = await response.json();
