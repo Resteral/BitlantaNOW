@@ -1,12 +1,15 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
+import { loadStripe } from "@stripe/stripe-js"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Check, Zap, Crown, Rocket, Star } from "lucide-react"
+
+// Initialize Stripe outside of component to avoid recreating object on every render
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface SubscriptionPlan {
   id: string
@@ -33,7 +36,7 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
       id: "basic",
       name: "BASIC GATE",
       price: 49.99,
-      currency: "RETRO",
+      currency: "USD",
       duration: "monthly",
       features: ["Access to 3 premium gates", "Basic crypto analytics", "Standard trading tools", "Community access"],
       icon: <Zap className="w-6 h-6" />,
@@ -43,7 +46,7 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
       id: "premium",
       name: "PREMIUM GATE",
       price: 99.99,
-      currency: "RETRO",
+      currency: "USD",
       duration: "monthly",
       features: [
         "Access to all 7 gates",
@@ -61,7 +64,7 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
       id: "elite",
       name: "ELITE GATE",
       price: 199.99,
-      currency: "RETRO",
+      currency: "USD",
       duration: "monthly",
       features: [
         "Unlimited gate access",
@@ -82,51 +85,40 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
     setProcessing(true)
 
     try {
-      const connectedWallet = (window as any).connectedWallet
-      const initiateWalletTransaction = (window as any).initiateWalletTransaction
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tier: plan.id,
+          // We pass name/amount for dynamic price creation since we don't have hardcoded Price IDs yet
+          amount: plan.price,
+          name: plan.name
+        }),
+      });
 
-      if (connectedWallet && initiateWalletTransaction) {
-        // Use connected wallet for payment
-        const ethAmount = plan.price * 0.001 // Convert RETRO to ETH (example rate)
-
-        if (Number.parseFloat(connectedWallet.balance) < ethAmount) {
-          alert(`Insufficient wallet balance! Need ${ethAmount.toFixed(4)} ETH`)
-          return
-        }
-
-        const txHash = await initiateWalletTransaction(ethAmount)
-
-        if (txHash) {
-          // Record successful wallet transaction
-          alert(`Successfully purchased ${plan.name} with wallet! Transaction: ${txHash.slice(0, 10)}...`)
-        } else {
-          alert("Wallet transaction failed. Please try again.")
-        }
-      } else {
-        // Fallback to internal RETRO balance
-        const processSubscriptionPurchase = (window as any).processSubscriptionPurchase
-
-        if (processSubscriptionPurchase) {
-          const success = await processSubscriptionPurchase(plan.id, plan.price, plan.name)
-
-          if (success) {
-            alert(`Successfully purchased ${plan.name} with RETRO tokens!`)
-          } else {
-            alert("Purchase failed. Please check your RETRO balance and try again.")
-          }
-        } else {
-          // Final fallback to original onPurchase prop
-          if (onPurchase) {
-            onPurchase(plan.id, plan.price)
-          }
-        }
+      if (!response.ok) {
+        throw new Error('Checkout request failed');
       }
+
+      const { url } = await response.json();
+
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+
     } catch (error) {
       console.error("Purchase error:", error)
-      alert("Purchase failed. Please try again.")
+      alert("Purchase initiation failed. Please try again.")
     } finally {
-      setProcessing(false)
-      setSelectedPlan(null)
+      // Create a slight delay so "Processing" isn't instant flicker on error
+      if (typeof window !== 'undefined') { // Safety check
+        setProcessing(false);
+        setSelectedPlan(null);
+      }
     }
   }
 
@@ -141,9 +133,8 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
         {plans.map((plan) => (
           <Card
             key={plan.id}
-            className={`relative bg-card/80 backdrop-blur-sm transition-all duration-300 hover:scale-105 ${
-              plan.popular ? "border-primary/50 ring-2 ring-primary/20" : "border-border/20"
-            }`}
+            className={`relative bg-card/80 backdrop-blur-sm transition-all duration-300 hover:scale-105 ${plan.popular ? "border-primary/50 ring-2 ring-primary/20" : "border-border/20"
+              }`}
           >
             {plan.popular && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -158,9 +149,9 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
               <div className={`mx-auto mb-2 ${plan.color}`}>{plan.icon}</div>
               <CardTitle className="font-mono">{plan.name}</CardTitle>
               <CardDescription>
-                <span className={`text-3xl font-bold ${plan.color} font-mono`}>{plan.price}</span>
+                <span className={`text-3xl font-bold ${plan.color} font-mono`}>${plan.price}</span>
                 <span className="text-sm text-muted-foreground ml-1">
-                  {plan.currency}/{plan.duration}
+                  /{plan.duration}
                 </span>
               </CardDescription>
             </CardHeader>
@@ -181,7 +172,7 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
                 onClick={() => handlePurchase(plan)}
                 disabled={selectedPlan === plan.id || processing}
               >
-                {selectedPlan === plan.id ? "PROCESSING..." : "PURCHASE GATE"}
+                {selectedPlan === plan.id ? "PROCESSING..." : "SUBSCRIBE VIA STRIPE"}
               </Button>
             </CardContent>
           </Card>
