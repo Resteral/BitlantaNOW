@@ -5,10 +5,16 @@ import { createServerClient } from "@supabase/ssr"
 
 // NOTE: This route requires STRIPE_WEBHOOK_SECRET and SUPABASE_SERVICE_ROLE_KEY to be set in .env.local
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2025-12-15.clover',
-    typescript: true,
-});
+// Initialize Stripe lazily
+const getStripe = () => {
+    if (!process.env.STRIPE_SECRET_KEY) {
+        throw new Error("STRIPE_SECRET_KEY is missing. Please set it in Vercel Environment Variables.");
+    }
+    return new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2025-12-15.clover',
+        typescript: true,
+    });
+};
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -19,6 +25,7 @@ export async function POST(req: Request) {
     let event: Stripe.Event;
 
     try {
+        const stripe = getStripe();
         if (webhookSecret && signature) {
             event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
         } else {

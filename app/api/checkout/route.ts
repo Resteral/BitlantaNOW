@@ -2,10 +2,16 @@ import { Stripe } from 'stripe';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2025-12-15.clover',
-    typescript: true,
-});
+// Initialize Stripe lazily to avoid build-time errors if env vars are missing
+const getStripe = () => {
+    if (!process.env.STRIPE_SECRET_KEY) {
+        throw new Error("STRIPE_SECRET_KEY is missing. Please set it in Vercel Environment Variables.");
+    }
+    return new Stripe(process.env.STRIPE_SECRET_KEY, {
+        apiVersion: '2025-12-15.clover',
+        typescript: true,
+    });
+};
 
 export async function POST(req: Request) {
     try {
@@ -23,6 +29,8 @@ export async function POST(req: Request) {
         }
 
         const origin = req.headers.get('origin') || 'http://localhost:3000';
+
+        const stripe = getStripe();
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
