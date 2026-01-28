@@ -99,7 +99,8 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Checkout request failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || errorData.error || 'Checkout request failed');
       }
 
       const { url } = await response.json();
@@ -110,9 +111,9 @@ export function SubscriptionPlans({ onPurchase }: SubscriptionPlansProps) {
         throw new Error('No checkout URL returned');
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Purchase error:", error)
-      alert("Purchase initiation failed. Please try again.")
+      alert(`Purchase failed: ${error.message}`)
     } finally {
       // Create a slight delay so "Processing" isn't instant flicker on error
       if (typeof window !== 'undefined') { // Safety check
