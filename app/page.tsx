@@ -276,6 +276,10 @@ export default function HomePage() {
           </Badge>
         </div>
 
+        <div className="max-w-5xl mx-auto mb-12 transform hover:scale-[1.01] transition-transform duration-500">
+          <SubscriptionPlans onPurchase={handleSubscriptionPurchase} />
+        </div>
+
         <DashboardBoard
           userLevel={userLevel}
           experience={experience}
