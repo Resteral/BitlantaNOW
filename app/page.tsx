@@ -341,7 +341,7 @@ export default function HomePage() {
               <div className="grid grid-cols-1 gap-6 sm:gap-8">
                 <CryptoWallet />
                 <WalletConnector />
-                <SubscriptionPlans onPurchase={handleSubscriptionPurchase} />
+
               </div>
               <CryptoStats isGateOpen={isGateOpen} />
             </div>

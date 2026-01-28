@@ -44,7 +44,9 @@ export async function POST(req: Request) {
         }
 
         if (!amount || !name) {
-            return new NextResponse(JSON.stringify({ error: 'Missing amount or name' }), {
+            return new NextResponse(JSON.stringify({
+                error: `Missing amount or name. Received: amount=${amount}, name=${name}, tier=${tier}`
+            }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' }
             });
