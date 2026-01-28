@@ -54,28 +54,7 @@ export default function HomePage() {
   // Auth state
   const [user, setUser] = useState<any>(null)
 
-  const [marketSignals, setMarketSignals] = useState<MarketSignal[]>([
-    {
-      id: "1",
-      symbol: "BTC",
-      type: "crypto",
-      status: "green",
-      title: "Bitcoin Bullish Breakout",
-      description: "Strong momentum above $45K resistance",
-      createdAt: new Date(),
-      price: "$46,250",
-    },
-    {
-      id: "2",
-      symbol: "ETH",
-      type: "crypto",
-      status: "red",
-      title: "Ethereum Warning",
-      description: "Potential correction incoming, watch support levels",
-      createdAt: new Date(),
-      price: "$2,890",
-    },
-  ])
+  const [marketSignals, setMarketSignals] = useState<MarketSignal[]>([])
 
   useEffect(() => {
     if (typeof window === "undefined") {

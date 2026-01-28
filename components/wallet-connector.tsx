@@ -89,28 +89,9 @@ export function WalletConnector() {
           }
           break
         case "WalletConnect":
-          // For demo purposes, simulate WalletConnect
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-          const mockAddress = "0x742d35Cc6634C0532925a3b8D4C9db96590c6C87"
-          const mockBalance = "2.45"
-
-          setConnectedWallet({
-            name: walletName,
-            address: mockAddress,
-            balance: mockBalance,
-            chainId: 1,
-            network: "Ethereum Mainnet",
-          })
-
-          setWallets((prev) =>
-            prev.map((w) =>
-              w.name === walletName
-                ? { ...w, connecting: false, connected: true, address: mockAddress, balance: mockBalance }
-                : { ...w, connected: false },
-            ),
-          )
-
-          toast.success(`Connected to ${walletName}!`)
+        case "WalletConnect":
+          // Real WalletConnect implementation would go here
+          toast.info("WalletConnect integration coming soon!")
           return
       }
 
@@ -228,11 +209,11 @@ export function WalletConnector() {
 
   useEffect(() => {
     if (connectedWallet) {
-      ;(window as any).initiateWalletTransaction = initiateWalletTransaction
-      ;(window as any).connectedWallet = connectedWallet
+      ; (window as any).initiateWalletTransaction = initiateWalletTransaction
+        ; (window as any).connectedWallet = connectedWallet
     } else {
-      ;(window as any).initiateWalletTransaction = null
-      ;(window as any).connectedWallet = null
+      ; (window as any).initiateWalletTransaction = null
+        ; (window as any).connectedWallet = null
     }
   }, [connectedWallet])
 
