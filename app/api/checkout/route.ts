@@ -1,20 +1,13 @@
 import { Stripe } from 'stripe';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 
 function logWithError(msg: string, error?: any) {
-    const logFile = path.resolve(process.cwd(), 'checkout_debug.log');
-    const timestamp = new Date().toISOString();
-    const errorStr = error ? `\nError: ${error.message}\nStack: ${error.stack}` : '';
-    try {
-        fs.appendFileSync(logFile, `${timestamp}: ${msg}${errorStr}\n`);
-    } catch (e) {
-        // Fallback if fs fails
-        console.error('Failed to write to log file:', e);
+    if (error) {
+        console.error(`[Checkout] ${msg}`, error);
+    } else {
+        console.log(`[Checkout] ${msg}`);
     }
-    console.log(msg, error || '');
 }
 
 // Initialize Stripe lazily to avoid build-time errors if env vars are missing
